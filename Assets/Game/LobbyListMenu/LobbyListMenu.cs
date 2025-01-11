@@ -89,15 +89,16 @@ public class LobbyListMenu : MonoBehaviour
         Debug.Log("Lobby joined.");
         _joinedLobbyID = new(arg.m_ulSteamIDLobby);
 
-        var transport = NetworkManager.Singleton.GetComponent<SteamNetworkingSocketsTransport>();
-        transport.ConnectToSteamID = arg.m_ulSteamIDLobby;
-
         NetworkManager.Singleton.StartClient();
     }
 
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t arg)
     {
         Debug.Log("Invite accepted.");
+
+        var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as SteamNetworkingSocketsTransport;
+        transport.ConnectToSteamID = arg.m_steamIDFriend.m_SteamID;
+
         _onJoinLobby.Set(SteamMatchmaking.JoinLobby(arg.m_steamIDLobby));
     }
 }
