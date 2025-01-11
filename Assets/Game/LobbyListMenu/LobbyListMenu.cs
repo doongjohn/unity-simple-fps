@@ -11,7 +11,6 @@ public class LobbyListMenu : MonoBehaviour
     private VisualElement _root;
     private Button _hostGameButton;
     private Button _startGameButton;
-    private Button _joinGameButton;
 
     private CSteamID? _joinedLobbyID; // move it to static field
 
@@ -31,15 +30,9 @@ public class LobbyListMenu : MonoBehaviour
 
         _hostGameButton = _root.Q("HostGameButton") as Button;
         _startGameButton = _root.Q("StartGameButton") as Button;
-        _joinGameButton = _root.Q("JoinGameButton") as Button;
 
         _hostGameButton.RegisterCallback<ClickEvent>(OnClickHostGameButton);
         _startGameButton.RegisterCallback<ClickEvent>(OnClickStartGameButton);
-        _joinGameButton.RegisterCallback<ClickEvent>((ClickEvent evt) =>
-        {
-            // NetworkManager.Singleton.StartClient();
-            // NetworkManager.Singleton.SceneManager.ActiveSceneSynchronizationEnabled = true;
-        });
 
         _onCreateLobby = new(OnCreateLobby);
         _onJoinLobby = new(OnJoinLobby);
@@ -50,13 +43,20 @@ public class LobbyListMenu : MonoBehaviour
     {
         Debug.Log("HostGameButton");
         NetworkManager.Singleton.StartHost();
-        NetworkManager.Singleton.SceneManager.ActiveSceneSynchronizationEnabled = true;
         _onCreateLobby.Set(SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 100));
     }
 
     private void OnClickStartGameButton(ClickEvent evt)
     {
-        NetworkManager.Singleton.SceneManager.LoadScene(Scenes.TestMap, LoadSceneMode.Single);
+        Debug.Log("StartGameButton");
+        if (NetworkManager.Singleton.IsHost)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene(Scenes.TestMap, LoadSceneMode.Single);
+        }
+        else
+        {
+            Debug.Log("You are not the host.");
+        }
     }
 
     private void OnCreateLobby(LobbyCreated_t arg, bool bIOFailure)
@@ -88,7 +88,6 @@ public class LobbyListMenu : MonoBehaviour
 
         Debug.Log("Lobby joined.");
         _joinedLobbyID = new(arg.m_ulSteamIDLobby);
-
         NetworkManager.Singleton.StartClient();
     }
 
