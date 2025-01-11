@@ -13,6 +13,7 @@ public class LobbyListMenu : MonoBehaviour
     private Button _joinGameButton;
 
     private CallResult<LobbyCreated_t> _onCreateLobby;
+    private CallResult<LobbyEnter_t> _onJoinLobby;
     private Callback<GameLobbyJoinRequested_t> _onGameLobbyJoinRequested;
 
     private void Awake()
@@ -26,9 +27,14 @@ public class LobbyListMenu : MonoBehaviour
 
         _hostGameButton.RegisterCallback<ClickEvent>(OnClickHostGameButton);
         _startGameButton.RegisterCallback<ClickEvent>(OnClickStartGameButton);
-        _joinGameButton.RegisterCallback<ClickEvent>((ClickEvent evt) => NetworkManager.Singleton.StartClient());
+        _joinGameButton.RegisterCallback<ClickEvent>((ClickEvent evt) =>
+        {
+            NetworkManager.Singleton.StartClient();
+            NetworkManager.Singleton.SceneManager.ActiveSceneSynchronizationEnabled = true;
+        });
 
         _onCreateLobby = CallResult<LobbyCreated_t>.Create(OnCreateLobby);
+        _onJoinLobby = CallResult<LobbyEnter_t>.Create(OnJoinLobby);
         _onGameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
     }
 
@@ -36,6 +42,7 @@ public class LobbyListMenu : MonoBehaviour
     {
         Debug.Log("HostGameButton");
         NetworkManager.Singleton.StartHost();
+        NetworkManager.Singleton.SceneManager.ActiveSceneSynchronizationEnabled = true;
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 100);
     }
 
@@ -62,9 +69,20 @@ public class LobbyListMenu : MonoBehaviour
         }
     }
 
+    private void OnJoinLobby(LobbyEnter_t arg, bool bIOFailure)
+    {
+        if (bIOFailure)
+        {
+            Debug.LogError("OnJoinLobby IOFailure.");
+            return;
+        }
+
+        Debug.Log("Lobby joined.");
+    }
+
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t arg)
     {
         Debug.Log("Invite accepted.");
-        // SteamMatchmaking.JoinLobby();
+        SteamMatchmaking.JoinLobby(arg.m_steamIDLobby);
     }
 }
