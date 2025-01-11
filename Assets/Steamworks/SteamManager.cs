@@ -90,5 +90,7 @@ public class SteamManager : MonoBehaviour
                 Debug.LogWarning(pchDebugText);
             })
         );
+
+        Debug.Log("[Steamworks.NET] Initialized.");
     }
 }

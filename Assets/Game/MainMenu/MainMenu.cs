@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -27,7 +28,7 @@ public class MainMenu : MonoBehaviour
     private void OnClickStartGameButton(ClickEvent evt)
     {
         Debug.Log("StartGameButton");
-        SceneManager.LoadScene(Scenes.TestMap);
+        SceneManager.LoadScene(Scenes.LobbyListMenu);
     }
 
     private void OnClickOptionsButton(ClickEvent evt)

@@ -1,8 +1,8 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/MainMenu/MainMenu.uss?fileID=7433441132597879392&amp;guid=60b2dc370e8507c46ae7f6071ac2eeef&amp;type=3#MainMenu" />
+    <Style src="project://database/Assets/Game/MainMenu/MainMenu.uss?fileID=7433441132597879392&amp;guid=60b2dc370e8507c46ae7f6071ac2eeef&amp;type=3#MainMenu" />
     <engine:VisualElement>
         <engine:VisualElement style="flex-grow: 1; height: 100px;" />
-        <engine:Label text="Simple FPS" style="align-self: center; font-size: 100px;" />
+        <engine:Label text="Simple FPS" style="align-self: center; font-size: 100px; color: rgb(255, 255, 255);" />
         <engine:VisualElement style="flex-grow: 1; height: 100px;" />
         <engine:VisualElement name="Buttons" style="width: 500px; align-self: center;">
             <engine:Button text="Start Game" name="StartGameButton" class="menu-button" />

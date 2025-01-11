@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/Game/MainMenu/MainMenu.unity
     guid: 96ae99214e3119b4ea965b4f0623f1b0
   - enabled: 1
+    path: Assets/Game/LobbyListMenu/LobbyListMenu.unity
+    guid: 832d4c1ecb078df4ebbba20e4a7a00b2
+  - enabled: 1
     path: Assets/Game/Maps/TestMap/TestMap.unity
     guid: 875ea777f98963f418f5865065e3a6ab
   m_configObjects:
