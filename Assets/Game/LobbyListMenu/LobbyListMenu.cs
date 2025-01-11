@@ -1,3 +1,4 @@
+using Netcode.Transports;
 using Steamworks;
 using Unity.Netcode;
 using UnityEngine;
@@ -36,13 +37,13 @@ public class LobbyListMenu : MonoBehaviour
         _startGameButton.RegisterCallback<ClickEvent>(OnClickStartGameButton);
         _joinGameButton.RegisterCallback<ClickEvent>((ClickEvent evt) =>
         {
-            NetworkManager.Singleton.StartClient();
-            NetworkManager.Singleton.SceneManager.ActiveSceneSynchronizationEnabled = true;
+            // NetworkManager.Singleton.StartClient();
+            // NetworkManager.Singleton.SceneManager.ActiveSceneSynchronizationEnabled = true;
         });
 
         _onCreateLobby = new(OnCreateLobby);
         _onJoinLobby = new(OnJoinLobby);
-        _onGameLobbyJoinRequested.Register(OnGameLobbyJoinRequested);
+        _onGameLobbyJoinRequested = new(OnGameLobbyJoinRequested);
     }
 
     private void OnClickHostGameButton(ClickEvent evt)
@@ -87,6 +88,11 @@ public class LobbyListMenu : MonoBehaviour
 
         Debug.Log("Lobby joined.");
         _joinedLobbyID = new(arg.m_ulSteamIDLobby);
+
+        var transport = NetworkManager.Singleton.GetComponent<SteamNetworkingSocketsTransport>();
+        transport.ConnectToSteamID = arg.m_ulSteamIDLobby;
+
+        NetworkManager.Singleton.StartClient();
     }
 
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t arg)
