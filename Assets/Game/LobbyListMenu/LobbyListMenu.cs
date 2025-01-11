@@ -12,12 +12,19 @@ public class LobbyListMenu : MonoBehaviour
     private Button _startGameButton;
     private Button _joinGameButton;
 
+    private CSteamID? _joinedLobbyID; // move it to static field
+
     private CallResult<LobbyCreated_t> _onCreateLobby;
     private CallResult<LobbyEnter_t> _onJoinLobby;
     private Callback<GameLobbyJoinRequested_t> _onGameLobbyJoinRequested;
 
     private void Awake()
     {
+        NetworkManager.Singleton.OnClientConnectedCallback += (ulong clientId) =>
+        {
+            Debug.Log("NetworkManager client connected.");
+        };
+
         _document = GetComponent<UIDocument>();
         _root = _document.rootVisualElement;
 
@@ -33,9 +40,9 @@ public class LobbyListMenu : MonoBehaviour
             NetworkManager.Singleton.SceneManager.ActiveSceneSynchronizationEnabled = true;
         });
 
-        _onCreateLobby = CallResult<LobbyCreated_t>.Create(OnCreateLobby);
-        _onJoinLobby = CallResult<LobbyEnter_t>.Create(OnJoinLobby);
-        _onGameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
+        _onCreateLobby = new(OnCreateLobby);
+        _onJoinLobby = new(OnJoinLobby);
+        _onGameLobbyJoinRequested.Register(OnGameLobbyJoinRequested);
     }
 
     private void OnClickHostGameButton(ClickEvent evt)
@@ -43,7 +50,7 @@ public class LobbyListMenu : MonoBehaviour
         Debug.Log("HostGameButton");
         NetworkManager.Singleton.StartHost();
         NetworkManager.Singleton.SceneManager.ActiveSceneSynchronizationEnabled = true;
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 100);
+        _onCreateLobby.Set(SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 100));
     }
 
     private void OnClickStartGameButton(ClickEvent evt)
@@ -62,6 +69,7 @@ public class LobbyListMenu : MonoBehaviour
         if (arg.m_eResult == EResult.k_EResultOK)
         {
             Debug.Log("Lobby created.");
+            _joinedLobbyID = new(arg.m_ulSteamIDLobby);
         }
         else
         {
@@ -78,11 +86,12 @@ public class LobbyListMenu : MonoBehaviour
         }
 
         Debug.Log("Lobby joined.");
+        _joinedLobbyID = new(arg.m_ulSteamIDLobby);
     }
 
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t arg)
     {
         Debug.Log("Invite accepted.");
-        SteamMatchmaking.JoinLobby(arg.m_steamIDLobby);
+        _onJoinLobby.Set(SteamMatchmaking.JoinLobby(arg.m_steamIDLobby));
     }
 }
