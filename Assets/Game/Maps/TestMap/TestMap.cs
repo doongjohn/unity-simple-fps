@@ -8,13 +8,14 @@ public class TestMap : NetworkBehaviour
 
     private void Start()
     {
-        SpawnPlayer();
+        SpawnPlayerRpc(OwnerClientId);
     }
 
-    private void SpawnPlayer()
+    [Rpc(SendTo.Server)]
+    private void SpawnPlayerRpc(ulong ownerId)
     {
         var player = Instantiate(PlayerPrefab);
         var network_player = player.GetComponent<NetworkObject>();
-        network_player.Spawn();
+        network_player.SpawnWithOwnership(ownerId);
     }
 }
