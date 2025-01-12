@@ -18,15 +18,20 @@ public class Player : NetworkBehaviour
     private void Awake()
     {
         _cmFpsCamera = GameObject.Find("Cm FPS Camera").GetComponent<CinemachineCamera>();
-        if (IsOwner)
-        {
-            _cmFpsCamera.Target.TrackingTarget = CameraTarget;
-        }
 
         _rb = GetComponent<Rigidbody>();
 
         _look = InputSystem.actions.FindAction("Player/Look");
         _move = InputSystem.actions.FindAction("Player/Move");
+    }
+
+    private void Start()
+    {
+        Debug.Log(IsOwner);
+        if (IsOwner)
+        {
+            _cmFpsCamera.Target.TrackingTarget = CameraTarget;
+        }
     }
 
     private void Update()
