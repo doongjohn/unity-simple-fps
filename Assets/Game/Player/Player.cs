@@ -24,6 +24,7 @@ public class Player : NetworkBehaviour
         _cameraTarget.MoveToTarget();
 
         _cmFirstPersonCamera = Instantiate(PrefabCmFirstPersonCamera);
+        _cmFirstPersonCamera.Target.TrackingTarget = _cameraTarget.transform;
 
         _rb = GetComponent<Rigidbody>();
 
@@ -34,8 +35,7 @@ public class Player : NetworkBehaviour
     {
         if (IsOwner)
         {
-            _cmFirstPersonCamera.Target.TrackingTarget = _cameraTarget.transform;
-            _cmFirstPersonCamera.Prioritize();
+            _cmFirstPersonCamera.Priority = 1;
         }
     }
 
