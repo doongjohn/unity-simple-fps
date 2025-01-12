@@ -6,13 +6,11 @@ using UnityEngine.InputSystem;
 public class Player : NetworkBehaviour
 {
     [SerializeField] private float WalkSpeed = 4.0f;
-    [SerializeField] private float LookSensitivity = 5.0f;
     [SerializeField] private Transform CameraTarget;
 
     private CinemachineCamera _cmFpsCamera;
     private Rigidbody _rb;
 
-    private InputAction _look;
     private InputAction _move;
 
     private void Awake()
@@ -21,13 +19,11 @@ public class Player : NetworkBehaviour
 
         _rb = GetComponent<Rigidbody>();
 
-        _look = InputSystem.actions.FindAction("Player/Look");
         _move = InputSystem.actions.FindAction("Player/Move");
     }
 
     private void Start()
     {
-        Debug.Log(IsOwner);
         if (IsOwner)
         {
             _cmFpsCamera.Target.TrackingTarget = CameraTarget;
@@ -38,7 +34,7 @@ public class Player : NetworkBehaviour
     {
         if (IsOwner)
         {
-            CameraControl();
+            CameraLook();
         }
     }
 
@@ -50,26 +46,12 @@ public class Player : NetworkBehaviour
         }
     }
 
-    private void CameraControl()
+    private void CameraLook()
     {
-        var lookDelta = _look.ReadValue<Vector2>();
-        var rotationY = lookDelta.x * LookSensitivity * Time.deltaTime;
-        var rotationX = -lookDelta.y * LookSensitivity * Time.deltaTime;
-
-        // Rotate self
+        var cameraRotation = _cmFpsCamera.transform.eulerAngles;
         var rotation = transform.eulerAngles;
-        rotation.x = 0;
-        rotation.z = 0;
+        rotation.y = cameraRotation.y;
         transform.eulerAngles = rotation;
-        transform.RotateAround(transform.position, transform.up, rotationY);
-
-        // Rotate camera
-        var cameraTransform = _cmFpsCamera.transform;
-        cameraTransform.RotateAround(cameraTransform.position, transform.right, rotationX);
-        var cameraRotation = cameraTransform.eulerAngles;
-        cameraRotation.y = transform.eulerAngles.y;
-        cameraRotation.z = transform.eulerAngles.z;
-        cameraTransform.eulerAngles = cameraRotation;
     }
 
     private void Movement()
