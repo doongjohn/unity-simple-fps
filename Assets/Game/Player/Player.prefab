@@ -357,5 +357,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   WalkSpeed: 4
-  LookSensitivity: 20
   CameraTarget: {fileID: 7342745459617728325}

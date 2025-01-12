@@ -65,6 +65,8 @@ public class Player : NetworkBehaviour
         var forwardSpeed = Vector3.Dot(transform.forward, velocity);
         var rightSpeed = Vector3.Dot(transform.right, velocity);
 
+        // TODO: Check for _rb.GetAccumulatedForce()
+
         if (Mathf.Abs(targetForwardSpeed) > Mathf.Abs(forwardSpeed))
         {
             var addSpeed = (targetForwardSpeed - forwardSpeed) / Time.fixedDeltaTime;
