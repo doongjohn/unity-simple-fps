@@ -6,16 +6,24 @@ using UnityEngine.InputSystem;
 public class Player : NetworkBehaviour
 {
     [SerializeField] private float WalkSpeed = 4.0f;
-    [SerializeField] private Transform CameraTarget;
 
-    private CinemachineCamera _cmFpsCamera;
+    [SerializeField] private CinemachineCamera PrefabCmFirstPersonCamera;
+
+    private PlayerCameraTarget _cameraTarget;
+    private CinemachineCamera _cmFirstPersonCamera;
+
     private Rigidbody _rb;
 
     private InputAction _move;
 
     private void Awake()
     {
-        _cmFpsCamera = GameObject.Find("Cm FPS Camera").GetComponent<CinemachineCamera>();
+        _cameraTarget = new GameObject().AddComponent<PlayerCameraTarget>();
+        _cameraTarget.Target = transform;
+        _cameraTarget.Offset = Vector3.up * 0.5f;
+        _cameraTarget.MoveToTarget();
+
+        _cmFirstPersonCamera = Instantiate(PrefabCmFirstPersonCamera);
 
         _rb = GetComponent<Rigidbody>();
 
@@ -26,7 +34,8 @@ public class Player : NetworkBehaviour
     {
         if (IsOwner)
         {
-            _cmFpsCamera.Target.TrackingTarget = CameraTarget;
+            _cmFirstPersonCamera.Target.TrackingTarget = _cameraTarget.transform;
+            _cmFirstPersonCamera.Prioritize();
         }
     }
 
@@ -48,7 +57,7 @@ public class Player : NetworkBehaviour
 
     private void CameraLook()
     {
-        var cameraRotation = _cmFpsCamera.transform.eulerAngles;
+        var cameraRotation = _cmFirstPersonCamera.transform.eulerAngles;
         var rotation = transform.eulerAngles;
         rotation.y = cameraRotation.y;
         transform.eulerAngles = rotation;
