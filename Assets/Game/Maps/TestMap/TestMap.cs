@@ -14,6 +14,7 @@ public class TestMap : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void SpawnPlayerRpc(ulong ownerId)
     {
+        Debug.Log(ownerId);
         var player = Instantiate(PlayerPrefab);
         var network_player = player.GetComponent<NetworkObject>();
         network_player.SpawnWithOwnership(ownerId);

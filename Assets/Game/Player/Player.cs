@@ -17,6 +17,9 @@ public class Player : NetworkBehaviour
 
     private void Update()
     {
+        if (!IsOwner)
+            return;
+
         var velocity = _rb.linearVelocity;
 
         var inputDir = _move.ReadValue<Vector2>();
