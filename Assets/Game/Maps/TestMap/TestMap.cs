@@ -8,11 +8,10 @@ public class TestMap : NetworkBehaviour
 
     private void Start()
     {
-        SpawnPlayerRpc();
+        SpawnPlayer();
     }
 
-    [Rpc(SendTo.Server)]
-    private void SpawnPlayerRpc()
+    private void SpawnPlayer()
     {
         var player = Instantiate(PlayerPrefab);
         var network_player = player.GetComponent<NetworkObject>();
