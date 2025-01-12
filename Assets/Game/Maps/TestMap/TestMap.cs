@@ -16,6 +16,7 @@ public class TestMap : NetworkBehaviour
     {
         var player = Instantiate(PlayerPrefab);
         var network_player = player.GetComponent<NetworkObject>();
+        network_player.transform.position = new(0, 1, 0);
         network_player.SpawnWithOwnership(rpcParams.Receive.SenderClientId);
     }
 }
