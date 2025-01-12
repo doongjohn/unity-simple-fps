@@ -8,15 +8,14 @@ public class TestMap : NetworkBehaviour
 
     private void Start()
     {
-        Debug.Log($"OwnerClientId: {OwnerClientId}");
-        SpawnPlayerRpc(OwnerClientId);
+        SpawnPlayerRpc();
     }
 
     [Rpc(SendTo.Server)]
-    private void SpawnPlayerRpc(ulong ownerId)
+    private void SpawnPlayerRpc(RpcParams rpcParams = default)
     {
         var player = Instantiate(PlayerPrefab);
         var network_player = player.GetComponent<NetworkObject>();
-        network_player.SpawnWithOwnership(ownerId);
+        network_player.SpawnWithOwnership(rpcParams.Receive.SenderClientId);
     }
 }
