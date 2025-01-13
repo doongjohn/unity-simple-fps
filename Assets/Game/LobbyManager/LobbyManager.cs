@@ -37,6 +37,11 @@ public class LobbyManager : MonoBehaviour
             Debug.Log($"NetworkManager client connected: {clientId}");
         };
 
+        NetworkManager.Singleton.OnClientStopped += (bool isHost) =>
+        {
+            Debug.Log($"OnClientStopped");
+        };
+
         NetworkManager.Singleton.OnConnectionEvent += (NetworkManager _, ConnectionEventData data) =>
         {
             switch (data.EventType)
