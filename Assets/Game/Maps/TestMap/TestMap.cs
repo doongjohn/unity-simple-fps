@@ -17,8 +17,6 @@ public class TestMap : NetworkBehaviour
 
     public override void OnDestroy()
     {
-        Debug.Log("OnDestory");
-
         if (NetworkManager.Singleton != null)
         {
             NetworkManager.Singleton.OnClientStopped -= OnClientStopped;
@@ -32,6 +30,7 @@ public class TestMap : NetworkBehaviour
 
     private void OnClientStopped(bool isHost)
     {
+        NetworkManager.Singleton.Shutdown();
         Debug.Log($"IsClient: {IsClient}");
         Debug.Log($"IsHost: {IsHost}");
         SceneManager.LoadScene(Scenes.LobbyListMenu);
