@@ -9,46 +9,47 @@ public class LobbyListMenu : MonoBehaviour
 {
     private UIDocument _document;
     private VisualElement _root;
-    private Button _hostGameButton;
-    private Button _startGameButton;
-
-    private CSteamID? _joinedLobbyID; // move it to static field
+    private Button _lobbyButton1;
+    private Button _lobbyButton2;
+    private Button _startMatchButton;
 
     private CallResult<LobbyCreated_t> _onCreateLobby;
-    private CallResult<LobbyEnter_t> _onJoinLobby;
-    private Callback<GameLobbyJoinRequested_t> _onGameLobbyJoinRequested;
 
     private void Awake()
     {
-        NetworkManager.Singleton.OnClientConnectedCallback += (ulong clientId) =>
-        {
-            Debug.Log("NetworkManager client connected.");
-        };
-
         _document = GetComponent<UIDocument>();
         _root = _document.rootVisualElement;
 
-        _hostGameButton = _root.Q("HostGameButton") as Button;
-        _startGameButton = _root.Q("StartGameButton") as Button;
-
-        _hostGameButton.RegisterCallback<ClickEvent>(OnClickHostGameButton);
-        _startGameButton.RegisterCallback<ClickEvent>(OnClickStartGameButton);
+        _lobbyButton1 = _root.Q("LobbyButton1") as Button;
+        _lobbyButton2 = _root.Q("LobbyButton2") as Button;
+        _startMatchButton = _root.Q("StartMatchButton") as Button;
+        SetLobbyButtonCallbacks();
 
         _onCreateLobby = new(OnCreateLobby);
-        _onJoinLobby = new(OnJoinLobby);
-        _onGameLobbyJoinRequested = new(OnGameLobbyJoinRequested);
     }
 
-    private void OnClickHostGameButton(ClickEvent evt)
+    private void SetLobbyButtonCallbacks()
     {
-        Debug.Log("HostGameButton");
+        // TODO: client면 (방 참가), (방 나가기)로 변경
+        _lobbyButton1.RegisterCallback<ClickEvent>(OnClickCreateLobbyButton);
+        _lobbyButton2.RegisterCallback<ClickEvent>(OnClickDeleteLobbyButton);
+        _startMatchButton.RegisterCallback<ClickEvent>(OnClickStartMatchButton);
+    }
+
+    private void OnClickCreateLobbyButton(ClickEvent evt)
+    {
         NetworkManager.Singleton.StartHost();
         _onCreateLobby.Set(SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 100));
     }
 
-    private void OnClickStartGameButton(ClickEvent evt)
+    private void OnClickDeleteLobbyButton(ClickEvent evt)
     {
-        Debug.Log("StartGameButton");
+        NetworkManager.Singleton.Shutdown();
+    }
+
+    private void OnClickStartMatchButton(ClickEvent evt)
+    {
+        Debug.Log("StartMatchButton");
         if (NetworkManager.Singleton.IsHost)
         {
             NetworkManager.Singleton.SceneManager.LoadScene(Scenes.TestMap, LoadSceneMode.Single);
@@ -70,34 +71,11 @@ public class LobbyListMenu : MonoBehaviour
         if (arg.m_eResult == EResult.k_EResultOK)
         {
             Debug.Log("Lobby created.");
-            _joinedLobbyID = new(arg.m_ulSteamIDLobby);
+            LobbyManager.Singleton.SetJoinedLobbyId(arg.m_ulSteamIDLobby);
         }
         else
         {
             Debug.Log("Failed to create a lobby.");
         }
-    }
-
-    private void OnJoinLobby(LobbyEnter_t arg, bool bIOFailure)
-    {
-        if (bIOFailure)
-        {
-            Debug.LogError("OnJoinLobby IOFailure.");
-            return;
-        }
-
-        Debug.Log("Lobby joined.");
-        _joinedLobbyID = new(arg.m_ulSteamIDLobby);
-        NetworkManager.Singleton.StartClient();
-    }
-
-    private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t arg)
-    {
-        Debug.Log("Invite accepted.");
-
-        var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as SteamNetworkingSocketsTransport;
-        transport.ConnectToSteamID = arg.m_steamIDFriend.m_SteamID;
-
-        _onJoinLobby.Set(SteamMatchmaking.JoinLobby(arg.m_steamIDLobby));
     }
 }

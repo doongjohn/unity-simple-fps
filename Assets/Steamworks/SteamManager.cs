@@ -4,7 +4,7 @@ using Steamworks;
 public class SteamManager : MonoBehaviour
 {
     private static SteamManager s_instance = null;
-    private static SteamManager Instance => s_instance;
+    public static SteamManager Singleton => s_instance;
 
     public static bool IsInitialized { get; private set; } = false;
 
@@ -15,16 +15,10 @@ public class SteamManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         s_instance = this;
         DontDestroyOnLoad(gameObject);
-        InitSteamworks();
 
-        if (IsInitialized)
-        {
-            string name = SteamFriends.GetPersonaName();
-            Debug.Log(name);
-        }
+        InitSteamworks();
     }
 
     private void OnDestroy()
