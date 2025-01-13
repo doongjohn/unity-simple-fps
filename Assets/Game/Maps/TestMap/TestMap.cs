@@ -21,18 +21,10 @@ public class TestMap : NetworkBehaviour
         {
             NetworkManager.Singleton.OnClientStopped -= OnClientStopped;
         }
-
-        if (LobbyManager.Singleton.JoinedLobbyId is { } id)
-        {
-            Debug.Log($"NumLobbyMembers: {SteamMatchmaking.GetNumLobbyMembers(id)}");
-        }
     }
 
     private void OnClientStopped(bool isHost)
     {
-        NetworkManager.Singleton.Shutdown();
-        Debug.Log($"IsClient: {IsClient}");
-        Debug.Log($"IsHost: {IsHost}");
         SceneManager.LoadScene(Scenes.LobbyListMenu);
     }
 

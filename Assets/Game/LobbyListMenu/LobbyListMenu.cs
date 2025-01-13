@@ -1,6 +1,6 @@
-using Netcode.Transports;
 using Steamworks;
 using Unity.Netcode;
+using Unity.Properties;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -12,8 +12,18 @@ public class LobbyListMenu : MonoBehaviour
     private Button _lobbyButton1;
     private Button _lobbyButton2;
     private Button _startMatchButton;
+    private IntegerField _maxPlayersNum;
+    private Toggle _friendOnlyToggle;
 
     private CallResult<LobbyCreated_t> _onCreateLobby;
+
+    private int _maxPlayersValue = 10;
+    [CreateProperty]
+    public int MaxPlayersValue
+    {
+        get => _maxPlayersValue;
+        set => _maxPlayersValue = Mathf.Clamp(value, 1, 10);
+    }
 
     private void Awake()
     {
@@ -23,40 +33,95 @@ public class LobbyListMenu : MonoBehaviour
         _lobbyButton1 = _root.Q("LobbyButton1") as Button;
         _lobbyButton2 = _root.Q("LobbyButton2") as Button;
         _startMatchButton = _root.Q("StartMatchButton") as Button;
-        SetLobbyButtonCallbacks();
+        _maxPlayersNum = _root.Q("MaxPlayersNum") as IntegerField;
+        _friendOnlyToggle = _root.Q("FriendOnlyToggle") as Toggle;
 
         _onCreateLobby = new(OnCreateLobby);
     }
 
-    private void SetLobbyButtonCallbacks()
+    private void Start()
     {
-        // TODO: client면 (방 참가), (방 나가기)로 변경
-        _lobbyButton1.RegisterCallback<ClickEvent>(OnClickCreateLobbyButton);
-        _lobbyButton2.RegisterCallback<ClickEvent>(OnClickDeleteLobbyButton);
-        _startMatchButton.RegisterCallback<ClickEvent>(OnClickStartMatchButton);
+        NetworkManager.Singleton.OnClientStopped += OnClientStopped;
+
+        _maxPlayersNum.dataSource = this;
+        _maxPlayersNum.SetBinding("value", new DataBinding
+        {
+            dataSourcePath = PropertyPath.FromName(nameof(MaxPlayersValue))
+        });
+
+        SetLobbyButtonCallbacks(true);
+    }
+
+    public void OnDestroy()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientStopped -= OnClientStopped;
+        }
+    }
+
+    private void OnClientStopped(bool isHost)
+    {
+        // TODO: 방 나갔음
+    }
+
+    private void SetLobbyButtonCallbacks(bool isCreateLobbyMode)
+    {
+        // Reset callbacks
+        _lobbyButton1.UnregisterCallback<ClickEvent>(OnClickCreateLobbyButton);
+        _lobbyButton2.UnregisterCallback<ClickEvent>(OnClickDeleteLobbyButton);
+        // _lobbyButton1.UnregisterCallback<ClickEvent>(OnClickJoinLobbyButton);
+        // _lobbyButton2.UnregisterCallback<ClickEvent>(OnClickLeaveLobbyButton);
+        _startMatchButton.UnregisterCallback<ClickEvent>(OnClickStartMatchButton);
+
+        if (isCreateLobbyMode)
+        {
+            _lobbyButton1.RegisterCallback<ClickEvent>(OnClickCreateLobbyButton);
+            _lobbyButton2.RegisterCallback<ClickEvent>(OnClickDeleteLobbyButton);
+            _startMatchButton.RegisterCallback<ClickEvent>(OnClickStartMatchButton);
+        }
+        else
+        {
+            // _lobbyButton1.RegisterCallback<ClickEvent>(OnClickJoinLobbyButton);
+            // _lobbyButton2.RegisterCallback<ClickEvent>(OnClickLeaveLobbyButton);
+        }
     }
 
     private void OnClickCreateLobbyButton(ClickEvent evt)
     {
-        NetworkManager.Singleton.StartHost();
-        _onCreateLobby.Set(SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, 100));
+        if (NetworkManager.Singleton.StartHost())
+        {
+            _maxPlayersNum.SetEnabled(false);
+            _friendOnlyToggle.SetEnabled(false);
+
+            var lobbyType = _friendOnlyToggle.value ? ELobbyType.k_ELobbyTypeFriendsOnly : ELobbyType.k_ELobbyTypePublic;
+            Debug.Log(MaxPlayersValue);
+            _onCreateLobby.Set(SteamMatchmaking.CreateLobby(lobbyType, MaxPlayersValue));
+        }
+        else
+        {
+            Debug.LogError("StartHost failed.");
+        }
     }
 
     private void OnClickDeleteLobbyButton(ClickEvent evt)
     {
         NetworkManager.Singleton.Shutdown();
+
+        _maxPlayersNum.SetEnabled(true);
+        _friendOnlyToggle.SetEnabled(true);
     }
 
     private void OnClickStartMatchButton(ClickEvent evt)
     {
-        Debug.Log("StartMatchButton");
         if (NetworkManager.Singleton.IsHost)
         {
+            Debug.Log("StartMatchButton: Start.");
             NetworkManager.Singleton.SceneManager.LoadScene(Scenes.TestMap, LoadSceneMode.Single);
         }
         else
         {
-            Debug.Log("You are not the host.");
+            Debug.Log("StartMatchButton: You are not the host.");
         }
     }
 
