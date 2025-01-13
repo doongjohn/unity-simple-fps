@@ -320,6 +320,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef89c7d650d9b5942ae0bd46b8cc261c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LobbyListEntryAsset: {fileID: 9197481963319205126, guid: 0796887e3f34faf43815c1144428e43d, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

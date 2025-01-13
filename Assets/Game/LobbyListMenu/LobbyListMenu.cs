@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Steamworks;
 using Unity.Netcode;
 using Unity.Properties;
@@ -5,24 +7,65 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
+public struct LobbyListEntryData
+{
+    public CSteamID LobbyId;
+    public string LobbyName;
+    public string LobbyOwnerName;
+}
+
+public class LobbyListEntryController
+{
+    private readonly Label _lobbyNameLabel;
+    private readonly Label _lobbyOwnerLabel;
+
+    public LobbyListEntryController(VisualElement _root)
+    {
+        _lobbyNameLabel = _root.Q("LobbyNameLabel") as Label;
+        _lobbyOwnerLabel = _root.Q("LobbyOwnerLabel") as Label;
+    }
+
+    public void UpdateElements(LobbyListEntryData data)
+    {
+        _lobbyNameLabel.text = data.LobbyName;
+        _lobbyOwnerLabel.text = data.LobbyOwnerName;
+    }
+}
+
 public class LobbyListMenu : MonoBehaviour
 {
+    [SerializeField] private VisualTreeAsset LobbyListEntryAsset;
+
     private UIDocument _document;
     private VisualElement _root;
+    private Button _refreshButton;
+    private ListView _lobbyListView;
+    private TextField _lobbyNameTextField;
     private Button _lobbyButton1;
     private Button _lobbyButton2;
     private Button _startMatchButton;
     private IntegerField _maxPlayersNum;
     private Toggle _friendOnlyToggle;
 
+    private CallResult<LobbyMatchList_t> _onRequestLobbyList;
     private CallResult<LobbyCreated_t> _onCreateLobby;
 
-    private int _maxPlayersValue = 10;
+    private List<LobbyListEntryData> _lobbyEntries = new();
+
+    private int _myMaxPlayersValue = 10;
     [CreateProperty]
-    public int MaxPlayersValue
+    public int MyMaxPlayersValue
     {
-        get => _maxPlayersValue;
-        set => _maxPlayersValue = Mathf.Clamp(value, 0, 10);
+        get => _myMaxPlayersValue;
+        set => _myMaxPlayersValue = Mathf.Clamp(value, 0, 10);
+    }
+
+    private string _myLobbyNameValue = "";
+    [CreateProperty]
+    public string MyLobbyNameValue
+    {
+        get => _myLobbyNameValue;
+        set => _myLobbyNameValue = value.Trim();
     }
 
     private void Awake()
@@ -30,12 +73,16 @@ public class LobbyListMenu : MonoBehaviour
         _document = GetComponent<UIDocument>();
         _root = _document.rootVisualElement;
 
+        _refreshButton = _root.Q("RefreshButton") as Button;
+        _lobbyListView = _root.Q("LobbyListView") as ListView;
+        _lobbyNameTextField = _root.Q("LobbyNameTextField") as TextField;
         _lobbyButton1 = _root.Q("LobbyButton1") as Button;
         _lobbyButton2 = _root.Q("LobbyButton2") as Button;
         _startMatchButton = _root.Q("StartMatchButton") as Button;
         _maxPlayersNum = _root.Q("MaxPlayersNum") as IntegerField;
         _friendOnlyToggle = _root.Q("FriendOnlyToggle") as Toggle;
 
+        _onRequestLobbyList = new(OnRequestLobbyList);
         _onCreateLobby = new(OnCreateLobby);
     }
 
@@ -43,12 +90,44 @@ public class LobbyListMenu : MonoBehaviour
     {
         NetworkManager.Singleton.OnClientStopped += OnClientStopped;
 
-        _maxPlayersNum.dataSource = this;
-        _maxPlayersNum.SetBinding("value", new DataBinding
+        // Setup RefreshButton.
+        _refreshButton.RegisterCallback<ClickEvent>((evt) =>
         {
-            dataSourcePath = PropertyPath.FromName(nameof(MaxPlayersValue))
+            _lobbyEntries.Clear();
+            _onRequestLobbyList.Set(SteamMatchmaking.RequestLobbyList());
         });
 
+        // Setup LobbyListView.
+        _lobbyListView.itemsSource = _lobbyEntries;
+        _lobbyListView.makeItem = () =>
+        {
+            var entry = LobbyListEntryAsset.Instantiate();
+            entry.userData = new LobbyListEntryController(entry);
+            return entry;
+        };
+        _lobbyListView.bindItem = (item, index) =>
+        {
+            (item.userData as LobbyListEntryController)?.UpdateElements(_lobbyEntries[index]);
+        };
+
+        // Setup LobbyName.
+        _lobbyNameTextField.SetBinding("value", new DataBinding
+        {
+            dataSource = this,
+            dataSourcePath = PropertyPath.FromName(nameof(MyLobbyNameValue))
+        });
+
+        // Setup MaxPlayersNum.
+        _maxPlayersNum.SetBinding("value", new DataBinding
+        {
+            dataSource = this,
+            dataSourcePath = PropertyPath.FromName(nameof(MyMaxPlayersValue))
+        });
+
+        // Request lobby list.
+        _onRequestLobbyList.Set(SteamMatchmaking.RequestLobbyList());
+
+        // Setup button callback.
         SetLobbyButtonCallbacks(true);
     }
 
@@ -95,8 +174,7 @@ public class LobbyListMenu : MonoBehaviour
             _friendOnlyToggle.SetEnabled(false);
 
             var lobbyType = _friendOnlyToggle.value ? ELobbyType.k_ELobbyTypeFriendsOnly : ELobbyType.k_ELobbyTypePublic;
-            Debug.Log(MaxPlayersValue);
-            _onCreateLobby.Set(SteamMatchmaking.CreateLobby(lobbyType, MaxPlayersValue));
+            _onCreateLobby.Set(SteamMatchmaking.CreateLobby(lobbyType, MyMaxPlayersValue));
         }
         else
         {
@@ -106,6 +184,7 @@ public class LobbyListMenu : MonoBehaviour
 
     private void OnClickDeleteLobbyButton(ClickEvent evt)
     {
+        LobbyManager.Singleton.LeaveLobby();
         NetworkManager.Singleton.Shutdown();
 
         _maxPlayersNum.SetEnabled(true);
@@ -125,6 +204,36 @@ public class LobbyListMenu : MonoBehaviour
         }
     }
 
+    private void OnRequestLobbyList(LobbyMatchList_t arg, bool bIOFailure)
+    {
+        if (bIOFailure)
+        {
+            Debug.LogError("OnRequestLobbyList IOFailure.");
+            return;
+        }
+
+        var foundLobbiesCount = arg.m_nLobbiesMatching;
+        Debug.Log($"Lobbies: {foundLobbiesCount}.");
+        for (var i = 0; i < foundLobbiesCount; ++i)
+        {
+            var lobbyId = SteamMatchmaking.GetLobbyByIndex(i);
+            var lobbyName = SteamMatchmaking.GetLobbyData(lobbyId, "LobbyName");
+            var lobbyOwnerName = SteamMatchmaking.GetLobbyData(lobbyId, "LobbyOwnerName");
+
+            if (!string.IsNullOrEmpty(lobbyName))
+            {
+                Debug.Log($"Lobby Name: {lobbyName}.");
+                _lobbyEntries.Add(new LobbyListEntryData
+                {
+                    LobbyId = lobbyId,
+                    LobbyName = lobbyName,
+                    LobbyOwnerName = lobbyOwnerName,
+                });
+            }
+        }
+        _lobbyListView.RefreshItems();
+    }
+
     private void OnCreateLobby(LobbyCreated_t arg, bool bIOFailure)
     {
         if (bIOFailure)
@@ -137,6 +246,10 @@ public class LobbyListMenu : MonoBehaviour
         {
             Debug.Log("Lobby created.");
             LobbyManager.Singleton.SetJoinedLobbyId(arg.m_ulSteamIDLobby);
+
+            var lobbyId = new CSteamID(arg.m_ulSteamIDLobby);
+            SteamMatchmaking.SetLobbyData(lobbyId, "LobbyName", MyLobbyNameValue);
+            SteamMatchmaking.SetLobbyData(lobbyId, "LobbyOwnerName", SteamFriends.GetPersonaName());
         }
         else
         {
