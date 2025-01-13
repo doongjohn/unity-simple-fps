@@ -25,6 +25,21 @@ public class MainMenu : MonoBehaviour
         _exitGameButton.RegisterCallback<ClickEvent>(OnClickExitGameButton);
     }
 
+    private void Start()
+    {
+        NetworkManager.Singleton.OnClientStarted += OnClientStarted;
+    }
+
+    private void OnDestroy()
+    {
+        NetworkManager.Singleton.OnClientStarted -= OnClientStarted;
+    }
+
+    private void OnClientStarted()
+    {
+        SceneManager.LoadScene(Scenes.LobbyListMenu);
+    }
+
     private void OnClickStartGameButton(ClickEvent evt)
     {
         Debug.Log("StartGameButton");

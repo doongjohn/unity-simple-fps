@@ -1,5 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.SceneManagement;
+using Steamworks;
 
 public class TestMap : NetworkBehaviour
 {
@@ -8,7 +10,31 @@ public class TestMap : NetworkBehaviour
 
     private void Start()
     {
+        NetworkManager.Singleton.OnClientStopped += OnClientStopped;
+
         SpawnPlayerRpc();
+    }
+
+    public override void OnDestroy()
+    {
+        Debug.Log("OnDestory");
+
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientStopped -= OnClientStopped;
+        }
+
+        if (LobbyManager.Singleton.JoinedLobbyId is { } id)
+        {
+            Debug.Log($"NumLobbyMembers: {SteamMatchmaking.GetNumLobbyMembers(id)}");
+        }
+    }
+
+    private void OnClientStopped(bool isHost)
+    {
+        Debug.Log($"IsClient: {IsClient}");
+        Debug.Log($"IsHost: {IsHost}");
+        SceneManager.LoadScene(Scenes.LobbyListMenu);
     }
 
     [Rpc(SendTo.Server)]

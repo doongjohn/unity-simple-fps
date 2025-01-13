@@ -77,26 +77,46 @@ public class LobbyManager : MonoBehaviour
         JoinedLobbyId = null;
     }
 
+    public void LeaveLobby()
+    {
+        if (JoinedLobbyId is { } id)
+        {
+            Debug.Log("You left the lobby.");
+            SteamMatchmaking.LeaveLobby(id);
+            NetworkManager.Singleton.Shutdown();
+            ClearJoinedLobbyId();
+        }
+    }
+
     private void OnJoinLobby(LobbyEnter_t arg, bool bIOFailure)
     {
         if (bIOFailure)
         {
             Debug.LogError("OnJoinLobby IOFailure.");
+            ClearJoinedLobbyId();
             return;
         }
 
-        Debug.Log("Lobby joined.");
-        SetJoinedLobbyId(arg.m_ulSteamIDLobby);
+        Debug.Log("You joined the lobby.");
         NetworkManager.Singleton.StartClient();
     }
 
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t arg)
     {
-        Debug.Log("Invite accepted.");
+        Debug.Log("You accepted the invite.");
+
+        if (JoinedLobbyId is { } id)
+        {
+            if (id.m_SteamID == arg.m_steamIDFriend.m_SteamID)
+                return;
+
+            LeaveLobby();
+        }
 
         var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as SteamNetworkingSocketsTransport;
         transport.ConnectToSteamID = arg.m_steamIDFriend.m_SteamID;
 
+        SetJoinedLobbyId(arg.m_steamIDLobby);
         _onJoinLobby.Set(SteamMatchmaking.JoinLobby(arg.m_steamIDLobby));
     }
 }
