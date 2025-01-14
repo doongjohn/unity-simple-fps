@@ -148,8 +148,16 @@ public class Player : NetworkBehaviour
         {
             var rayStartPos = _cmFirstPersonCamera.transform.position;
             var rayDir = _cmFirstPersonCamera.transform.forward;
+
+            Debug.DrawRay(rayStartPos, rayDir, Color.red, 2);
+
             if (Physics.Raycast(rayStartPos, rayDir, out var rayHitInfo, 100))
             {
+                if (rayHitInfo.collider == this)
+                {
+                    Debug.Log("self hit");
+                }
+
                 if (rayHitInfo.collider != this && rayHitInfo.collider.CompareTag("Player"))
                 {
                     var player = rayHitInfo.collider.GetComponent<Player>();
