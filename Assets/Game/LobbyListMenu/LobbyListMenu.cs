@@ -288,7 +288,7 @@ public class LobbyListMenu : MonoBehaviour
         for (var i = 0; i < foundLobbiesCount; ++i)
         {
             var lobbyId = SteamMatchmaking.GetLobbyByIndex(i);
-            var lobbyOwnerId = SteamMatchmaking.GetLobbyData(lobbyId, "LobbyOwnerName");
+            var lobbyOwnerId = SteamMatchmaking.GetLobbyData(lobbyId, "LobbyOwnerId");
             var lobbyName = SteamMatchmaking.GetLobbyData(lobbyId, "LobbyName");
             var lobbyOwnerName = SteamMatchmaking.GetLobbyData(lobbyId, "LobbyOwnerName");
 
