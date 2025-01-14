@@ -143,6 +143,11 @@ public class Player : NetworkBehaviour
         AttemptShootRpc(_cmFirstPersonCamera.transform.forward);
     }
 
+    public void Init()
+    {
+        Health = HealthMax;
+    }
+
     public void CheckDeath()
     {
         if (Health == 0)
@@ -174,15 +179,9 @@ public class Player : NetworkBehaviour
                 {
                     var player = rayHitInfo.collider.GetComponent<Player>();
                     player.Health -= 20;
-                    Debug.Log($"Hit player: {player.GetInstanceID()}, {player.Health}");
                     player.CheckDeath();
                 }
             }
         }
-    }
-
-    public void Init()
-    {
-        Health = HealthMax;
     }
 }
