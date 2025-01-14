@@ -56,13 +56,13 @@ public class Player : NetworkBehaviour
             Init();
         }
 
+        _cameraTarget = new GameObject().AddComponent<PlayerCameraTarget>();
+        _cameraTarget.Target = transform;
+        _cameraTarget.Offset = Vector3.up * 0.5f;
+        _cameraTarget.MoveToTarget();
+
         if (IsOwner)
         {
-            _cameraTarget = new GameObject().AddComponent<PlayerCameraTarget>();
-            _cameraTarget.Target = transform;
-            _cameraTarget.Offset = Vector3.up * 0.5f;
-            _cameraTarget.MoveToTarget();
-
             _cmFirstPersonCamera = Instantiate(PrefabCmFirstPersonCamera);
             _cmFirstPersonCamera.Follow = _cameraTarget.transform;
             _cmFirstPersonCamera.Priority = 1;
@@ -138,7 +138,6 @@ public class Player : NetworkBehaviour
 
     private void OnInputShoot(InputAction.CallbackContext ctx)
     {
-        Debug.Log("Shoot");
         AttemptShootRpc(_cmFirstPersonCamera.transform.forward);
     }
 
@@ -165,21 +164,24 @@ public class Player : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void AttemptShootRpc(Vector3 shootDir)
     {
-        if (BulletCount > 0)
+        if (BulletCount == 0)
         {
-            var rayStartPos = _cmFirstPersonCamera.transform.position;
-            var rayDir = shootDir;
+            return;
+        }
 
-            Debug.DrawRay(rayStartPos, rayDir * 100, Color.red, 2);
+        var rayStartPos = _cameraTarget.transform.position;
+        var rayDir = shootDir;
 
-            if (Physics.Raycast(rayStartPos, rayDir, out var rayHitInfo, 100))
+        Debug.DrawRay(rayStartPos, rayDir * 100, Color.red, 2);
+
+        if (Physics.Raycast(rayStartPos, rayDir, out var rayHitInfo, 100))
+        {
+            var collider = rayHitInfo.collider;
+            if (collider != this && collider.CompareTag("Player"))
             {
-                if (rayHitInfo.collider != this && rayHitInfo.collider.CompareTag("Player"))
-                {
-                    var player = rayHitInfo.collider.GetComponent<Player>();
-                    player.Health -= 20;
-                    player.CheckDeath();
-                }
+                var player = collider.GetComponent<Player>();
+                player.Health -= 20;
+                player.CheckDeath();
             }
         }
     }
