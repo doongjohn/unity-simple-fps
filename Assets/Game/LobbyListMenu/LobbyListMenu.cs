@@ -233,6 +233,7 @@ public class LobbyListMenu : MonoBehaviour
     {
         if (NetworkManager.Singleton.StartHost())
         {
+            Debug.Log($"My id: {SteamUser.GetSteamID().m_SteamID}");
             _lobbyNameTextField.SetEnabled(false);
             _maxPlayersIntField.SetEnabled(false);
             _friendOnlyToggle.SetEnabled(false);
