@@ -206,6 +206,10 @@ public class LobbyListMenu : MonoBehaviour
 
     private void OnClickJoinLobbyButton(ClickEvent evt)
     {
+        // FIXME:
+        // 로비 리스트가 5초마다 업데이트 되기 때문에
+        // 방장이 삭제한 방에 참가할 수도 있다.
+
         if (JoiningLobbyData is { } lobbyData)
         {
             UpdateLobbyElements(false);
