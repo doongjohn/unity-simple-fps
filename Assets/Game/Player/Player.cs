@@ -59,8 +59,6 @@ public class Player : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkSpawn();
-
         if (IsHost)
         {
             Init();
@@ -75,6 +73,18 @@ public class Player : NetworkBehaviour
             var inGameHud = FindFirstObjectByType<InGameHud>();
             inGameHud.InitPlayer(this);
         }
+
+        base.OnNetworkSpawn();
+    }
+
+    public override void OnDestroy()
+    {
+        if (IsOwner)
+        {
+            _inputShoot.performed -= OnInputShoot;
+        }
+
+        base.OnDestroy();
     }
 
     private void Update()
@@ -133,13 +143,19 @@ public class Player : NetworkBehaviour
         AttemptShootRpc(_cmFirstPersonCamera.transform.forward);
     }
 
-    private void CheckDeath()
+    public void CheckDeath()
     {
         if (Health == 0)
         {
-            Destroy(_cameraTarget);
+            OnDeathRpc();
             GetComponent<NetworkObject>().Despawn();
         }
+    }
+
+    [Rpc(SendTo.Owner)]
+    private void OnDeathRpc()
+    {
+        Destroy(_cameraTarget);
     }
 
     [Rpc(SendTo.Server)]
@@ -159,7 +175,7 @@ public class Player : NetworkBehaviour
                     var player = rayHitInfo.collider.GetComponent<Player>();
                     player.Health -= 20;
                     Debug.Log($"Hit player: {player.GetInstanceID()}, {player.Health}");
-                    CheckDeath();
+                    player.CheckDeath();
                 }
             }
         }
