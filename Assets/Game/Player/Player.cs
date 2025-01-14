@@ -14,7 +14,7 @@ public class Player : NetworkBehaviour
 
     private Rigidbody _rb;
 
-    private InputAction _move;
+    private InputAction _inputMove;
 
     private void Awake()
     {
@@ -28,7 +28,7 @@ public class Player : NetworkBehaviour
 
         _rb = GetComponent<Rigidbody>();
 
-        _move = InputSystem.actions.FindAction("Player/Move");
+        _inputMove = InputSystem.actions.FindAction("Player/Move");
     }
 
     private void Start()
@@ -65,7 +65,7 @@ public class Player : NetworkBehaviour
 
     private void Movement()
     {
-        var inputDir = _move.ReadValue<Vector2>();
+        var inputDir = _inputMove.ReadValue<Vector2>();
 
         var targetForwardSpeed = inputDir.y * WalkSpeed;
         var targetRightSpeed = inputDir.x * WalkSpeed;

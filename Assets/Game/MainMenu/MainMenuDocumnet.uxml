@@ -5,9 +5,9 @@
         <engine:Label text="Simple FPS" style="align-self: center; font-size: 100px; color: rgb(255, 255, 255);" />
         <engine:VisualElement style="flex-grow: 1; height: 100px;" />
         <engine:VisualElement name="Buttons" style="width: 500px; align-self: center;">
-            <engine:Button text="Start Game" name="StartGameButton" class="menu-button" />
-            <engine:Button text="Options" name="OptionsButton" class="menu-button" />
-            <engine:Button text="Exit Game" name="ExitGameButton" class="menu-button" />
+            <engine:Button text="Start Game" name="StartGameButton" class="menuButton" />
+            <engine:Button text="Options" name="OptionsButton" class="menuButton" />
+            <engine:Button text="Exit Game" name="ExitGameButton" class="menuButton" />
         </engine:VisualElement>
     </engine:VisualElement>
 </engine:UXML>
