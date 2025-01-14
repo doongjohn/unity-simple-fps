@@ -117,7 +117,6 @@ public class LobbyManager : MonoBehaviour
         }
 
         // Join lobby.
-        Debug.Log($"Host id: {lobbyOwnerId.m_SteamID}");
         var transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as SteamNetworkingSocketsTransport;
         transport.ConnectToSteamID = lobbyOwnerId.m_SteamID;
 
