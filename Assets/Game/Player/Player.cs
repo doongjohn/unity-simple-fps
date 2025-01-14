@@ -130,7 +130,7 @@ public class Player : NetworkBehaviour
     private void OnInputShoot(InputAction.CallbackContext ctx)
     {
         Debug.Log("Shoot");
-        AttemptShootRpc();
+        AttemptShootRpc(_cmFirstPersonCamera.transform.forward);
     }
 
     private void CheckDeath()
@@ -142,22 +142,17 @@ public class Player : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    private void AttemptShootRpc()
+    private void AttemptShootRpc(Vector3 shootDir)
     {
         if (BulletCount > 0)
         {
             var rayStartPos = _cmFirstPersonCamera.transform.position;
-            var rayDir = _cmFirstPersonCamera.transform.forward;
+            var rayDir = shootDir;
 
-            Debug.DrawRay(rayStartPos, rayDir, Color.red, 2);
+            Debug.DrawRay(rayStartPos, rayDir * 100, Color.red, 2);
 
             if (Physics.Raycast(rayStartPos, rayDir, out var rayHitInfo, 100))
             {
-                if (rayHitInfo.collider == this)
-                {
-                    Debug.Log("self hit");
-                }
-
                 if (rayHitInfo.collider != this && rayHitInfo.collider.CompareTag("Player"))
                 {
                     var player = rayHitInfo.collider.GetComponent<Player>();
