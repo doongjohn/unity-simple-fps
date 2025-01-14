@@ -1,7 +1,7 @@
-using Unity.Netcode;
-using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
+using Unity.Netcode;
 
 public class Player : NetworkBehaviour
 {

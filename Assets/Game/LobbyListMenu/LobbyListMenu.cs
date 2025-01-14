@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using Steamworks;
-using Unity.Netcode;
-using Unity.Properties;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using Unity.Properties;
+using Unity.Netcode;
 
 public struct LobbyListEntryData
 {

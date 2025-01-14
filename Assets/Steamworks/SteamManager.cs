@@ -1,5 +1,5 @@
-using UnityEngine;
 using Steamworks;
+using UnityEngine;
 
 public class SteamManager : MonoBehaviour
 {

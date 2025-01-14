@@ -1,7 +1,7 @@
+using Steamworks;
 using UnityEngine;
 using Unity.Netcode;
 using Netcode.Transports;
-using Steamworks;
 
 public class LobbyManager : MonoBehaviour
 {
