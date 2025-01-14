@@ -137,7 +137,8 @@ public class Player : NetworkBehaviour
     {
         if (Health == 0)
         {
-            Destroy(this);
+            Destroy(_cameraTarget);
+            GetComponent<NetworkObject>().Despawn();
         }
     }
 
