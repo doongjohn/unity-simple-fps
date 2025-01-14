@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Properties;
 using Unity.Cinemachine;
 using Unity.Netcode;
 
@@ -15,6 +16,30 @@ public class Player : NetworkBehaviour
     private Rigidbody _rb;
 
     private InputAction _inputMove;
+    private InputAction _inputShoot;
+
+    private NetworkVariable<int> _healthMax = new(100);
+    [CreateProperty]
+    public int HealthMax
+    {
+        get => _healthMax.Value;
+        set => _healthMax.Value = Mathf.Max(value, 0);
+    }
+
+    private NetworkVariable<int> _health = new();
+    [CreateProperty]
+    public int Health
+    {
+        get => _health.Value;
+        set => _health.Value = Mathf.Clamp(value, 0, HealthMax);
+    }
+
+    private int _bulletCount = 10;
+    private int BulletCount
+    {
+        get => _bulletCount;
+        set => _bulletCount = Mathf.Clamp(value, 0, 10);
+    }
 
     private void Awake()
     {
@@ -29,13 +54,26 @@ public class Player : NetworkBehaviour
         _rb = GetComponent<Rigidbody>();
 
         _inputMove = InputSystem.actions.FindAction("Player/Move");
+        _inputShoot = InputSystem.actions.FindAction("Player/Shoot");
     }
 
-    private void Start()
+    public override void OnNetworkSpawn()
     {
+        base.OnNetworkSpawn();
+
+        if (IsHost)
+        {
+            Init();
+        }
+
         if (IsOwner)
         {
             _cmFirstPersonCamera.Priority = 1;
+
+            _inputShoot.performed += OnInputShoot;
+
+            var inGameHud = FindFirstObjectByType<InGameHud>();
+            inGameHud.InitPlayer(this);
         }
     }
 
@@ -87,5 +125,44 @@ public class Player : NetworkBehaviour
             var addSpeed = (targetRightSpeed - rightSpeed) / Time.fixedDeltaTime;
             _rb.AddForce(transform.right * addSpeed, ForceMode.Acceleration);
         }
+    }
+
+    private void OnInputShoot(InputAction.CallbackContext ctx)
+    {
+        Debug.Log("Shoot");
+        AttemptShootRpc();
+    }
+
+    private void CheckDeath()
+    {
+        if (Health == 0)
+        {
+            Destroy(this);
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void AttemptShootRpc()
+    {
+        if (BulletCount > 0)
+        {
+            var rayStartPos = _cmFirstPersonCamera.transform.position;
+            var rayDir = _cmFirstPersonCamera.transform.forward;
+            if (Physics.Raycast(rayStartPos, rayDir, out var rayHitInfo, 100))
+            {
+                if (rayHitInfo.collider != this && rayHitInfo.collider.CompareTag("Player"))
+                {
+                    var player = rayHitInfo.collider.GetComponent<Player>();
+                    player.Health -= 20;
+                    Debug.Log($"Hit player: {player.GetInstanceID()}, {player.Health}");
+                    CheckDeath();
+                }
+            }
+        }
+    }
+
+    public void Init()
+    {
+        Health = HealthMax;
     }
 }

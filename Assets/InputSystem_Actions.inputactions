@@ -531,10 +531,10 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Look",
-                    "type": "PassThrough",
-                    "id": "05158f63-2abd-4694-91a7-dacc3cce96ce",
-                    "expectedControlType": "Vector2",
+                    "name": "Shoot",
+                    "type": "Button",
+                    "id": "fdb1aaf1-8670-401a-95e2-68a7324d4523",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -598,12 +598,12 @@
                 },
                 {
                     "name": "",
-                    "id": "fddaba60-768e-429c-bf27-064e5066b72d",
-                    "path": "<Mouse>/delta",
+                    "id": "337c711b-dc16-45cc-8136-9dc0ff6e8018",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Look",
+                    "action": "Shoot",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
