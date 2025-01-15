@@ -21,7 +21,7 @@ public class LobbyListEntryController
     private readonly Label _lobbyOwnerLabel;
     private readonly Button _lobbyJoinButton;
 
-    public LobbyListEntryController(LobbyListMenu lobbyListMenu, VisualElement root, EventCallback<ClickEvent> onClickJoinButton)
+    public LobbyListEntryController(LobbyDashboardMenu lobbyListMenu, VisualElement root, EventCallback<ClickEvent> onClickJoinButton)
     {
         _lobbyNameLabel = root.Q("LobbyNameLabel") as Label;
         _lobbyOwnerLabel = root.Q("LobbyOwnerLabel") as Label;
@@ -43,7 +43,7 @@ public class LobbyListEntryController
     }
 }
 
-public class LobbyListMenu : MonoBehaviour
+public class LobbyDashboardMenu : MonoBehaviour
 {
     [SerializeField] private VisualTreeAsset LobbyListEntryAsset;
 

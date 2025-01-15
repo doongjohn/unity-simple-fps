@@ -169,12 +169,13 @@ public class Player : NetworkBehaviour
             return;
         }
 
-        var rayStartPos = _cameraTarget.transform.position;
+        var rayPos = _cameraTarget.transform.position;
         var rayDir = shootDir;
+        var rayDist = 100f;
 
-        Debug.DrawRay(rayStartPos, rayDir * 100, Color.red, 2);
+        Debug.DrawRay(rayPos, rayDir * rayDist, Color.red, 2);
 
-        if (Physics.Raycast(rayStartPos, rayDir, out var rayHitInfo, 100))
+        if (Physics.Raycast(rayPos, rayDir, out var rayHitInfo, rayDist))
         {
             var collider = rayHitInfo.collider;
             if (collider != this && collider.CompareTag("Player"))
