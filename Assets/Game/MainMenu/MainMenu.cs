@@ -32,7 +32,10 @@ public class MainMenu : MonoBehaviour
 
     private void OnDestroy()
     {
-        NetworkManager.Singleton.OnClientStarted -= OnClientStarted;
+        if (NetworkManager.Singleton)
+        {
+            NetworkManager.Singleton.OnClientStarted -= OnClientStarted;
+        }
     }
 
     private void OnClientStarted()
