@@ -1,5 +1,5 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/Game/LobbyListMenu/LobbyListMenu.uss?fileID=7433441132597879392&amp;guid=33b6bbb7657bbba4cb2664958db46c3f&amp;type=3#LobbyListMenu" />
+    <Style src="project://database/Assets/Game/LobbyDashboardMenu/LobbyDashboardMenu.uss?fileID=7433441132597879392&amp;guid=33b6bbb7657bbba4cb2664958db46c3f&amp;type=3#LobbyDashboardMenu" />
     <engine:VisualElement style="padding-top: 20px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px; flex-direction: row; flex-grow: 1;">
         <engine:VisualElement style="flex-grow: 0; background-color: rgb(43, 43, 43); margin-right: 5px; width: 400px; flex-shrink: 0;">
             <engine:Button text="Refresh" name="RefreshButton" style="margin-top: 4px; margin-right: 4px; margin-bottom: 4px; margin-left: 4px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;" />
@@ -16,8 +16,8 @@
                 <engine:Button text="Delete lobby" name="LobbyButton2" style="padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; margin-top: 2px; margin-right: 4px; margin-bottom: 2px; margin-left: 2px;" />
             </engine:VisualElement>
             <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
-                <engine:VisualElement style="flex-grow: 1; max-width: 400px;">
-                    <engine:ListView />
+                <engine:VisualElement style="background-color: rgb(34, 34, 34); margin-top: 4px; margin-right: 4px; margin-bottom: 4px; margin-left: 4px; width: 400px;">
+                    <engine:ListView name="LobbyMemberListView" virtualization-method="DynamicHeight" />
                 </engine:VisualElement>
                 <engine:VisualElement style="flex-grow: 1;">
                     <engine:VisualElement style="flex-grow: 0; flex-direction: row; flex-shrink: 1;">
