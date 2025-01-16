@@ -277,6 +277,8 @@ public class LobbyDashboardMenu : MonoBehaviour
         _maxPlayersIntField.value = 10;
         _lobbyMemberListEntries.Clear();
         _lobbyMemberListView.RefreshItems();
+        _lobbyChatHistoryListEntries.Clear();
+        _lobbyChatHistoryListView.RefreshItems();
         UpdateLobbyElements(true);
     }
 
