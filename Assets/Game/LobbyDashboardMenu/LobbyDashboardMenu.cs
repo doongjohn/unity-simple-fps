@@ -213,16 +213,16 @@ public class LobbyDashboardMenu : MonoBehaviour
         };
 
         // Setup LobbyChatHistortListView.
-        _lobbyChatHistoryListView.itemsSource = _lobbyMemberListEntries;
+        _lobbyChatHistoryListView.itemsSource = _lobbyChatHistoryListEntries;
         _lobbyChatHistoryListView.makeItem = () =>
         {
-            var item = LobbyMemberListEntryAsset.Instantiate();
-            item.userData = new LobbyMemberListEntryController(item);
+            var item = LobbyChatHistoryListEntryAsset.Instantiate();
+            item.userData = new LobbyChatHistoryListEntryController(item);
             return item;
         };
         _lobbyChatHistoryListView.bindItem = (item, index) =>
         {
-            (item.userData as LobbyMemberListEntryController)?.UpdateElements(_lobbyMemberListEntries[^(index + 1)]);
+            (item.userData as LobbyChatHistoryListEntryController)?.UpdateElements(_lobbyChatHistoryListEntries[^(index + 1)]);
         };
 
         // Setup LobbyChatTextField.
