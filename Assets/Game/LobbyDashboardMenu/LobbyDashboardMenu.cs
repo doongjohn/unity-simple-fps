@@ -222,13 +222,17 @@ public class LobbyDashboardMenu : MonoBehaviour
         };
         _lobbyChatHistoryListView.bindItem = (item, index) =>
         {
-            (item.userData as LobbyChatHistoryListEntryController)?.UpdateElements(_lobbyChatHistoryListEntries[^(index + 1)]);
+            (item.userData as LobbyChatHistoryListEntryController)?.UpdateElements(_lobbyChatHistoryListEntries[index]);
         };
 
         // Setup LobbyChatTextField.
         _lobbyChatTextField.RegisterCallback<ChangeEvent<string>>((evt) =>
         {
-            var name = SteamFriends.GetPersonaName(); // TODO: store name in a singleton
+            if (string.IsNullOrEmpty(evt.newValue))
+                return;
+
+            // TODO: store name in a singleton
+            var name = SteamFriends.GetPersonaName();
             var message = evt.newValue;
             LobbyChatManager?.SendMessage(name, message);
             _lobbyChatTextField.value = "";
