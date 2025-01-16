@@ -258,6 +258,7 @@ public class LobbyDashboardMenu : MonoBehaviour
     {
         _lobbyChatHistoryListEntries.Add(new LobbyChatHistroyListEntryData { Name = Name, Message = Message });
         _lobbyChatHistoryListView.RefreshItems();
+        _lobbyChatHistoryListView.ScrollToItem(_lobbyChatHistoryListEntries.Count - 1);
     }
 
     private void OnClientStarted()
