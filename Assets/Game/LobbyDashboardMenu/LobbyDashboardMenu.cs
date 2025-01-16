@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Unity.Properties;
 using Unity.Netcode;
-using UnityEngine.InputSystem.Utilities;
 
 public struct LobbyListEntryData
 {
