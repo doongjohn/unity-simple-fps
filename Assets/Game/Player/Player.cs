@@ -42,9 +42,6 @@ public class Player : NetworkBehaviour
     {
         _rb = GetComponent<Rigidbody>();
 
-        _weaponStateMachine = Instantiate(PrefabWeaponPistol);
-        _weaponStateMachine.Player = this;
-
         _inputMove = InputSystem.actions.FindAction("Player/Move");
     }
 
@@ -52,7 +49,7 @@ public class Player : NetworkBehaviour
     {
         if (IsHost)
         {
-            Init();
+            HostInit();
         }
 
         _cameraTarget = new GameObject().AddComponent<PlayerCameraTarget>();
@@ -133,9 +130,15 @@ public class Player : NetworkBehaviour
         }
     }
 
-    public void Init()
+    public void HostInit()
     {
         Health = HealthMax;
+
+        if (IsOwner)
+        {
+            _weaponStateMachine = Instantiate(PrefabWeaponPistol);
+            _weaponStateMachine.Player = this;
+        }
     }
 
     public Vector3 GetHeadPosition()
@@ -145,7 +148,9 @@ public class Player : NetworkBehaviour
 
     public Vector3 GetCameraDir()
     {
-        return _cameraDir;
+        // TODO: 클라가 방향 넘겨줘야 함.
+        // return _cameraDir;
+        return _cmFirstPersonCamera.transform.forward;
     }
 
     public void CheckDeath()
