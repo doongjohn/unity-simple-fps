@@ -56,6 +56,9 @@ public class Player : NetworkBehaviour
         _cameraTarget.Offset = Vector3.up * 0.5f;
         _cameraTarget.MoveToTarget();
 
+        _weaponStateMachine = Instantiate(PrefabWeaponPistol);
+        _weaponStateMachine.Player = this;
+
         if (IsOwner)
         {
             _cmFirstPersonCamera = Instantiate(PrefabCmFirstPersonCamera);
@@ -132,12 +135,6 @@ public class Player : NetworkBehaviour
     public void HostInit()
     {
         Health = HealthMax;
-
-        if (IsOwner)
-        {
-            _weaponStateMachine = Instantiate(PrefabWeaponPistol);
-            _weaponStateMachine.Player = this;
-        }
     }
 
     public Vector3 GetHeadPosition()
