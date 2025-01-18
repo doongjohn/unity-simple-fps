@@ -180,7 +180,7 @@ public class Player : NetworkBehaviour
     {
         if (_weaponStateMachine != null)
         {
-            _weaponStateMachine.ClientInput.InputCameraDir = _cmFirstPersonCamera.transform.forward;
+            _weaponStateMachine.ClientInput.InputCameraDir = input.InputCameraDir;
             _weaponStateMachine.ClientInput.InputWeaponShoot = input.InputWeaponShoot;
             _weaponStateMachine.ClientInput.InputWeaponAim = input.InputWeaponAim;
             _weaponStateMachine.ClientInput.InputWeaponReload = input.InputWeaponReload;
