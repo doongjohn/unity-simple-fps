@@ -8,6 +8,7 @@ public struct BufferedPlayerState : INetworkSerializeByMemcpy
 {
     public UInt64 Tick;
     public Vector3 Pos;
+    public bool IsStunned;
 }
 
 public struct BufferedPlayerInput : INetworkSerializeByMemcpy
@@ -28,7 +29,7 @@ public class PredictionPlayer : NetworkBehaviour
 
     private InputAction _inputMove;
 
-    private bool _isStun = false;
+    private bool _isStunned = false;
     private float _stunTime = 0;
 
     private void Awake()
@@ -66,7 +67,7 @@ public class PredictionPlayer : NetworkBehaviour
             if (!IsHost)
             {
                 // Client-side prediction.
-                if (!_isStun)
+                if (!_isStunned)
                 {
                     var pos = Move(input);
                     transform.position = pos;
@@ -85,7 +86,7 @@ public class PredictionPlayer : NetworkBehaviour
                 var input = _recivedInputs.Dequeue();
 
                 // Process input.
-                if (!_isStun)
+                if (!_isStunned)
                 {
                     var pos = Move(input.InputMove);
                     transform.position = pos;
@@ -95,18 +96,19 @@ public class PredictionPlayer : NetworkBehaviour
                 {
                     Tick = input.Tick,
                     Pos = transform.position,
+                    IsStunned = _isStunned,
                 };
 
                 SendStateToOwnerRpc(state);
                 SendStateToNonOwnerRpc(state);
             }
 
-            if (_isStun)
+            if (_isStunned)
             {
                 _stunTime += Time.fixedDeltaTime;
                 if (_stunTime >= 2)
                 {
-                    _isStun = false;
+                    _isStunned = false;
                     _stunTime = 0;
                     SendStunToOwnerRpc(false);
                 }
@@ -130,6 +132,7 @@ public class PredictionPlayer : NetworkBehaviour
         {
             Tick = _tick,
             Pos = transform.position,
+            IsStunned = _isStunned,
         });
         if (_stateBuffer.Count >= 30)
             _stateBuffer.RemoveAt(0);
@@ -152,7 +155,7 @@ public class PredictionPlayer : NetworkBehaviour
             var stateIndex = _stateBuffer.FindIndex(0, _stateBuffer.Count, (item) => item.Tick == serverState.Tick);
             var clientState = _stateBuffer[stateIndex];
 
-            if (clientState.Pos == serverState.Pos)
+            if (clientState.Equals(serverState))
             {
                 Debug.Log("Prediction success");
             }
@@ -160,21 +163,30 @@ public class PredictionPlayer : NetworkBehaviour
             {
                 Debug.Log("Prediction failed");
 
+                // Apply server state.
                 transform.position = serverState.Pos;
+                _isStunned = serverState.IsStunned;
 
+                // Remove old state.
                 _stateBuffer.RemoveRange(0, stateIndex + 1);
                 _inputBuffer.RemoveRange(0, stateIndex + 1);
 
+                // Repredict
                 for (int i = 0; i < _stateBuffer.Count; ++i)
                 {
                     var input = _inputBuffer[i];
-                    var pos = Move(input.InputMove);
-                    transform.position = pos;
+
+                    if (!_isStunned)
+                    {
+                        var pos = Move(input.InputMove);
+                        transform.position = pos;
+                    }
 
                     _stateBuffer[i] = new BufferedPlayerState
                     {
                         Tick = _stateBuffer[i].Tick,
                         Pos = transform.position,
+                        IsStunned = _isStunned,
                     };
                 }
             }
@@ -205,14 +217,14 @@ public class PredictionPlayer : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void SendStunToServerRpc()
     {
-        _isStun = true;
+        _isStunned = true;
         SendStunToOwnerRpc(true);
     }
 
     [Rpc(SendTo.Owner)]
     private void SendStunToOwnerRpc(bool value)
     {
-        Debug.Log("Stun");
-        _isStun = value;
+        Debug.Log("Stunned");
+        _isStunned = value;
     }
 }
