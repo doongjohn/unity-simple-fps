@@ -133,6 +133,10 @@ public class PredictionPlayer : NetworkBehaviour
             var stateIndex = _stateBuffer.FindIndex(0, _stateBuffer.Count, (item) => item.Tick == serverState.Tick);
             var clientState = _stateBuffer[stateIndex];
 
+            // Remove old state.
+            _stateBuffer.RemoveRange(0, stateIndex + 1);
+            _inputBuffer.RemoveRange(0, stateIndex + 1);
+
             if (clientState.Equals(serverState))
             {
                 Debug.Log("Prediction success");
@@ -144,10 +148,6 @@ public class PredictionPlayer : NetworkBehaviour
                 // Apply server state.
                 transform.position = serverState.Pos;
                 _isStunned = serverState.IsStunned;
-
-                // Remove old state.
-                _stateBuffer.RemoveRange(0, stateIndex + 1);
-                _inputBuffer.RemoveRange(0, stateIndex + 1);
 
                 // Repredict
                 for (int i = 0; i < _stateBuffer.Count; ++i)
