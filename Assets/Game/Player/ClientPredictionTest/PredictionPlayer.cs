@@ -61,19 +61,13 @@ public class PredictionPlayer : NetworkBehaviour
             _tick += 1;
 
             // Get input.
-            var input = _inputMove.ReadValue<Vector2>();
-            SendInputToServerRpc(new BufferedPlayerInput { Tick = _tick, InputMove = input });
+            var inputMove = _inputMove.ReadValue<Vector2>();
+            SendInputToServerRpc(new BufferedPlayerInput { Tick = _tick, InputMove = inputMove });
 
             if (!IsHost)
             {
-                // Client-side prediction.
-                if (!_isStunned)
-                {
-                    var pos = Move(input);
-                    transform.position = pos;
-                }
-
-                ClientSaveStates(input);
+                ProcessTick(inputMove); // <-- Client-side prediction.
+                ClientSaveStates(inputMove);
                 ClientRollback();
             }
         }
@@ -82,15 +76,8 @@ public class PredictionPlayer : NetworkBehaviour
         {
             while (_recivedInputs.Count > 0)
             {
-                // Get input.
                 var input = _recivedInputs.Dequeue();
-
-                // Process input.
-                if (!_isStunned)
-                {
-                    var pos = Move(input.InputMove);
-                    transform.position = pos;
-                }
+                ProcessTick(input.InputMove);
 
                 var state = new BufferedPlayerState
                 {
@@ -114,15 +101,6 @@ public class PredictionPlayer : NetworkBehaviour
                 }
             }
         }
-    }
-
-    private Vector3 Move(Vector2 input)
-    {
-        var pos = transform.position;
-        var moveDelta = input * (MoveSpeed * Time.fixedDeltaTime);
-        pos.x += moveDelta.x;
-        pos.z += moveDelta.y;
-        return pos;
     }
 
     private void ClientSaveStates(Vector2 input)
@@ -175,12 +153,7 @@ public class PredictionPlayer : NetworkBehaviour
                 for (int i = 0; i < _stateBuffer.Count; ++i)
                 {
                     var input = _inputBuffer[i];
-
-                    if (!_isStunned)
-                    {
-                        var pos = Move(input.InputMove);
-                        transform.position = pos;
-                    }
+                    ProcessTick(input.InputMove);
 
                     _stateBuffer[i] = new BufferedPlayerState
                     {
@@ -191,6 +164,24 @@ public class PredictionPlayer : NetworkBehaviour
                 }
             }
         }
+    }
+
+    private void ProcessTick(Vector2 input)
+    {
+        if (!_isStunned)
+        {
+            var pos = Move(input);
+            transform.position = pos;
+        }
+    }
+
+    private Vector3 Move(Vector2 input)
+    {
+        var pos = transform.position;
+        var moveDelta = input * (MoveSpeed * Time.fixedDeltaTime);
+        pos.x += moveDelta.x;
+        pos.z += moveDelta.y;
+        return pos;
     }
 
     [Rpc(SendTo.Server)]
