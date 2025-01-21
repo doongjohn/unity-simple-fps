@@ -66,8 +66,11 @@ public class PredictionPlayer : NetworkBehaviour
             if (!IsHost)
             {
                 // Client-side prediction.
-                var pos = Move(input);
-                transform.position = pos;
+                if (_isStun)
+                {
+                    var pos = Move(input);
+                    transform.position = pos;
+                }
 
                 ClientSaveStates(input);
                 ClientRollback();
@@ -105,6 +108,7 @@ public class PredictionPlayer : NetworkBehaviour
                 {
                     _isStun = false;
                     _stunTime = 0;
+                    SendStunToOwnerRpc(false);
                 }
             }
         }
@@ -203,5 +207,12 @@ public class PredictionPlayer : NetworkBehaviour
     {
         _isStun = true;
         Debug.Log("Stun");
+        SendStunToOwnerRpc(true);
+    }
+
+    [Rpc(SendTo.Owner)]
+    private void SendStunToOwnerRpc(bool value)
+    {
+        _isStun = value;
     }
 }
