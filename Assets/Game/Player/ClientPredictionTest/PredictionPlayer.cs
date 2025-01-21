@@ -66,7 +66,7 @@ public class PredictionPlayer : NetworkBehaviour
             if (!IsHost)
             {
                 // Client-side prediction.
-                if (_isStun)
+                if (!_isStun)
                 {
                     var pos = Move(input);
                     transform.position = pos;
