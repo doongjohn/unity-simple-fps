@@ -70,12 +70,14 @@ public class PredictionPlayer : NetworkBehaviour
                 var pos = Move(input.InputMove);
                 transform.position = pos;
 
-                // Send state to owner.
-                SendStateToOwnerRpc(new BufferedPlayerState
+                var state = new BufferedPlayerState
                 {
                     Tick = input.Tick,
                     Pos = transform.position,
-                });
+                };
+
+                SendStateToOwnerRpc(state);
+                SendStateToNonOwnerRpc(state);
             }
         }
     }
@@ -157,5 +159,14 @@ public class PredictionPlayer : NetworkBehaviour
     private void SendStateToOwnerRpc(BufferedPlayerState state)
     {
         _recivedStates.Enqueue(state);
+    }
+
+    [Rpc(SendTo.NotOwner)]
+    private void SendStateToNonOwnerRpc(BufferedPlayerState state)
+    {
+        if (!IsHost)
+        {
+            transform.position = state.Pos;
+        }
     }
 }
