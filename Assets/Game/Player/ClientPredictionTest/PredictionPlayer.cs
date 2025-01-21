@@ -206,13 +206,13 @@ public class PredictionPlayer : NetworkBehaviour
     private void SendStunToServerRpc()
     {
         _isStun = true;
-        Debug.Log("Stun");
         SendStunToOwnerRpc(true);
     }
 
     [Rpc(SendTo.Owner)]
     private void SendStunToOwnerRpc(bool value)
     {
+        Debug.Log("Stun");
         _isStun = value;
     }
 }
