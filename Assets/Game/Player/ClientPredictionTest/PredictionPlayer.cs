@@ -28,9 +28,24 @@ public class PredictionPlayer : NetworkBehaviour
 
     private InputAction _inputMove;
 
+    private bool _isStun = false;
+    private float _stunTime = 0;
+
     private void Awake()
     {
         _inputMove = InputSystem.actions.FindAction("Player/Move");
+    }
+
+    private void Update()
+    {
+        if (IsOwner)
+        {
+            // Self stun.
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                SendStunToServerRpc();
+            }
+        }
     }
 
     private void FixedUpdate()
@@ -67,8 +82,11 @@ public class PredictionPlayer : NetworkBehaviour
                 var input = _recivedInputs.Dequeue();
 
                 // Process input.
-                var pos = Move(input.InputMove);
-                transform.position = pos;
+                if (!_isStun)
+                {
+                    var pos = Move(input.InputMove);
+                    transform.position = pos;
+                }
 
                 var state = new BufferedPlayerState
                 {
@@ -78,6 +96,16 @@ public class PredictionPlayer : NetworkBehaviour
 
                 SendStateToOwnerRpc(state);
                 SendStateToNonOwnerRpc(state);
+            }
+
+            if (_isStun)
+            {
+                _stunTime += Time.fixedDeltaTime;
+                if (_stunTime >= 2)
+                {
+                    _isStun = false;
+                    _stunTime = 0;
+                }
             }
         }
     }
@@ -168,5 +196,12 @@ public class PredictionPlayer : NetworkBehaviour
         {
             transform.position = state.Pos;
         }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void SendStunToServerRpc()
+    {
+        _isStun = true;
+        Debug.Log("Stun");
     }
 }
