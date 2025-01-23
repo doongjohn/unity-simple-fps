@@ -7,6 +7,7 @@ using Unity.Netcode;
 public struct BufferedPlayerState : INetworkSerializeByMemcpy
 {
     public UInt64 Tick;
+    public float DeltaTime;
     public Vector3 Pos;
     public bool IsStunned;
 }
@@ -19,7 +20,7 @@ public struct BufferedPlayerInput : INetworkSerializeByMemcpy
 
 public class PredictionPlayer : NetworkBehaviour
 {
-    public float MoveSpeed = 10;
+    public float MoveSpeed = 3;
 
     private UInt64 _tick = 0;
     private List<BufferedPlayerState> _stateBuffer = new();
@@ -39,12 +40,33 @@ public class PredictionPlayer : NetworkBehaviour
 
     private void Update()
     {
+        if (!IsSpawned)
+        {
+            return;
+        }
+
         if (IsOwner)
         {
+            _tick += 1;
+
+            // Read input.
+            var inputMove = _inputMove.ReadValue<Vector2>();
+
+            // Send input to server.
+            SendInputToServerRpc(new BufferedPlayerInput { Tick = _tick, InputMove = inputMove });
+
             // Self stun.
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SendStunToServerRpc();
+            }
+
+            // Client-side prediction and reconciliation
+            if (!IsHost)
+            {
+                ProcessTick(Time.deltaTime, inputMove);
+                ClientSaveStates(inputMove);
+                ClientRollback();
             }
         }
     }
@@ -56,40 +78,8 @@ public class PredictionPlayer : NetworkBehaviour
             return;
         }
 
-        if (IsOwner)
-        {
-            _tick += 1;
-
-            // Get input.
-            var inputMove = _inputMove.ReadValue<Vector2>();
-            SendInputToServerRpc(new BufferedPlayerInput { Tick = _tick, InputMove = inputMove });
-
-            if (!IsHost)
-            {
-                ProcessTick(inputMove); // <-- Client-side prediction.
-                ClientSaveStates(inputMove);
-                ClientRollback();
-            }
-        }
-
         if (IsHost)
         {
-            while (_recivedInputs.Count > 0)
-            {
-                var input = _recivedInputs.Dequeue();
-                ProcessTick(input.InputMove);
-
-                var state = new BufferedPlayerState
-                {
-                    Tick = input.Tick,
-                    Pos = transform.position,
-                    IsStunned = _isStunned,
-                };
-
-                SendStateToOwnerRpc(state);
-                SendStateToNonOwnerRpc(state);
-            }
-
             if (_isStunned)
             {
                 _stunTime += Time.fixedDeltaTime;
@@ -100,6 +90,28 @@ public class PredictionPlayer : NetworkBehaviour
                     SendStunToOwnerRpc(false);
                 }
             }
+
+            UInt64 lastTick = 0;
+            while (_recivedInputs.Count > 0)
+            {
+                // Recive input.
+                var input = _recivedInputs.Dequeue();
+                lastTick = input.Tick;
+
+                // Run game logic.
+                ProcessTick(Time.fixedDeltaTime, input.InputMove);
+            }
+
+            var state = new BufferedPlayerState
+            {
+                Tick = lastTick,
+                Pos = transform.position,
+                IsStunned = _isStunned,
+            };
+
+            // Send state to clients
+            SendStateToOwnerRpc(state);
+            SendStateToNonOwnerRpc(state);
         }
     }
 
@@ -109,6 +121,7 @@ public class PredictionPlayer : NetworkBehaviour
         _stateBuffer.Add(new BufferedPlayerState
         {
             Tick = _tick,
+            DeltaTime = Time.deltaTime,
             Pos = transform.position,
             IsStunned = _isStunned,
         });
@@ -152,12 +165,14 @@ public class PredictionPlayer : NetworkBehaviour
                 // Repredict
                 for (int i = 0; i < _stateBuffer.Count; ++i)
                 {
+                    var deltaTime = _stateBuffer[i].DeltaTime;
                     var input = _inputBuffer[i];
-                    ProcessTick(input.InputMove);
+                    ProcessTick(deltaTime, input.InputMove);
 
                     _stateBuffer[i] = new BufferedPlayerState
                     {
                         Tick = _stateBuffer[i].Tick,
+                        DeltaTime = deltaTime,
                         Pos = transform.position,
                         IsStunned = _isStunned,
                     };
@@ -166,19 +181,19 @@ public class PredictionPlayer : NetworkBehaviour
         }
     }
 
-    private void ProcessTick(Vector2 input)
+    private void ProcessTick(float deltaTime, Vector2 input)
     {
         if (!_isStunned)
         {
-            var pos = Move(input);
+            var pos = Move(deltaTime, input);
             transform.position = pos;
         }
     }
 
-    private Vector3 Move(Vector2 input)
+    private Vector3 Move(float deltaTime, Vector2 input)
     {
         var pos = transform.position;
-        var moveDelta = input * (MoveSpeed * Time.fixedDeltaTime);
+        var moveDelta = input * (MoveSpeed * deltaTime);
         pos.x += moveDelta.x;
         pos.z += moveDelta.y;
         return pos;
