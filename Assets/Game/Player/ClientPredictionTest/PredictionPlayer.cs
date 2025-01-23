@@ -54,7 +54,12 @@ public class PredictionPlayer : NetworkBehaviour
             var inputMove = _inputMove.ReadValue<Vector2>();
 
             // Send input to server.
-            SendInputToServerRpc(new BufferedPlayerInput { Tick = _tick, InputMove = inputMove });
+            SendInputToServerRpc(new BufferedPlayerInput
+            {
+                Tick = _tick,
+                DeltaTime = Time.deltaTime,
+                InputMove = inputMove,
+            });
 
             // Self stun.
             if (Input.GetKeyDown(KeyCode.Space))
