@@ -144,6 +144,9 @@ public class PredictionPlayer : NetworkBehaviour
         {
             var serverState = _recivedStates.Dequeue();
             var stateIndex = _stateBuffer.FindIndex(0, _stateBuffer.Count, (item) => item.Tick == serverState.Tick);
+            if (stateIndex == -1)
+                return;
+
             var clientState = _stateBuffer[stateIndex];
 
             // Remove old state.
