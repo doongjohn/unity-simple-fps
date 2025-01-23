@@ -15,6 +15,7 @@ public struct BufferedPlayerState : INetworkSerializeByMemcpy
 public struct BufferedPlayerInput : INetworkSerializeByMemcpy
 {
     public UInt64 Tick;
+    public float DeltaTime;
     public Vector2 InputMove;
 }
 
@@ -99,7 +100,7 @@ public class PredictionPlayer : NetworkBehaviour
                 lastTick = input.Tick;
 
                 // Run game logic.
-                ProcessTick(Time.fixedDeltaTime, input.InputMove);
+                ProcessTick(input.DeltaTime, input.InputMove);
             }
 
             var state = new BufferedPlayerState
@@ -132,6 +133,7 @@ public class PredictionPlayer : NetworkBehaviour
         _inputBuffer.Add(new BufferedPlayerInput
         {
             Tick = _tick,
+            DeltaTime = Time.deltaTime,
             InputMove = input,
         });
         if (_inputBuffer.Count >= 30)
@@ -148,6 +150,7 @@ public class PredictionPlayer : NetworkBehaviour
                 return;
 
             var clientState = _stateBuffer[stateIndex];
+            serverState.DeltaTime = clientState.DeltaTime;
 
             // Remove old state.
             _stateBuffer.RemoveRange(0, stateIndex + 1);
