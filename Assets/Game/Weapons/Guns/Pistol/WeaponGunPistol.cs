@@ -88,6 +88,21 @@ public class WeaponTickDataGunPistol : WeaponTickData
     public float ShootTimerDuration;
     public float ShootTimerTime;
 
+    public static WeaponTickDataGunPistol NewFromReader(UInt64 type, UInt64 tick, FastBufferReader reader)
+    {
+        var result = new WeaponTickDataGunPistol
+        {
+            Type = type,
+            Tick = tick,
+        };
+        reader.ReadValue(out result.StateIndex);
+        reader.ReadValue(out result.MagazineSize);
+        reader.ReadValue(out result.AmmoCount);
+        reader.ReadValue(out result.ShootTimerDuration);
+        reader.ReadValue(out result.ShootTimerTime);
+        return result;
+    }
+
     public override byte[] Serialize()
     {
         var size = Marshal.SizeOf(typeof(WeaponTickDataGunPistol));
@@ -112,19 +127,23 @@ public class WeaponTickDataGunPistol : WeaponTickData
         return result;
     }
 
-    public static WeaponTickDataGunPistol NewFromReader(UInt64 type, UInt64 tick, FastBufferReader reader)
+    public override bool Compare(WeaponTickData other)
     {
-        var result = new WeaponTickDataGunPistol
+        if (other is WeaponTickDataGunPistol otherGunPistol)
         {
-            Type = type,
-            Tick = tick,
-        };
-        reader.ReadValue(out result.StateIndex);
-        reader.ReadValue(out result.MagazineSize);
-        reader.ReadValue(out result.AmmoCount);
-        reader.ReadValue(out result.ShootTimerDuration);
-        reader.ReadValue(out result.ShootTimerTime);
-        return result;
+            var result = base.Compare(other);
+            if (!result) return false;
+            result = result && StateIndex == otherGunPistol.StateIndex;
+            result = result && MagazineSize == otherGunPistol.MagazineSize;
+            result = result && AmmoCount == otherGunPistol.AmmoCount;
+            result = result && ShootTimerDuration == otherGunPistol.ShootTimerDuration;
+            result = result && ShootTimerTime == otherGunPistol.ShootTimerTime;
+            return result;
+        }
+        else
+        {
+            return false;
+        }
     }
 }
 
@@ -296,7 +315,7 @@ public class WeaponGunPistol : Weapon
 
     private void Reconcile()
     {
-        var serverTickData = _stateMachine.Player.LatestWeaponTickData as WeaponTickDataGunPistol;
+        var serverTickData = _stateMachine.Player.LatestWeaponTickData;
         if (serverTickData is not null)
         {
             _stateMachine.Player.LatestWeaponTickData = null;
@@ -304,22 +323,14 @@ public class WeaponGunPistol : Weapon
             var i = _stateMachine.GetTickDataIndexFromBuffer(serverTickData.Tick);
             if (i == -1) return;
 
-            var predictedTickData = _stateMachine.TickBuffer[i] as WeaponTickDataGunPistol;
+            var predictedTickData = _stateMachine.TickBuffer[i];
 
             // Remove old data.
             _stateMachine.InputBuffer.RemoveRange(0, i + 1);
             _stateMachine.TickBuffer.RemoveRange(0, i + 1);
 
-            var isEqual = true;
-            isEqual = isEqual && (serverTickData.Type == predictedTickData.Type);
-            isEqual = isEqual && (serverTickData.StateIndex == predictedTickData.StateIndex);
-            isEqual = isEqual && (serverTickData.MagazineSize == predictedTickData.MagazineSize);
-            isEqual = isEqual && (serverTickData.AmmoCount == predictedTickData.AmmoCount);
-            isEqual = isEqual && (serverTickData.ShootTimerDuration == predictedTickData.ShootTimerDuration);
-            isEqual = isEqual && (serverTickData.ShootTimerTime == predictedTickData.ShootTimerTime);
-
             // Check prediction.
-            if (isEqual)
+            if (serverTickData.Compare(predictedTickData))
             {
                 // Prediction success.
                 Debug.Log("Prediction success");

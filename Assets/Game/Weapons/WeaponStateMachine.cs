@@ -48,6 +48,11 @@ public class WeaponTickData
     {
         return null;
     }
+
+    public virtual bool Compare(WeaponTickData other)
+    {
+        return Type == other.Tick && Tick == other.Tick;
+    }
 }
 
 public class WeaponContext
