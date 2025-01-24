@@ -61,11 +61,8 @@ public class Player : NetworkBehaviour
         _cameraTarget.Offset = Vector3.up * 0.5f;
         _cameraTarget.MoveToTarget();
 
-        if (IsHost || IsOwner)
-        {
-            _weapon = Instantiate(PrefabWeaponPistol);
-            _weapon.Init(this);
-        }
+        _weapon = Instantiate(PrefabWeaponPistol);
+        _weapon.Init(this);
 
         if (IsOwner)
         {
@@ -198,12 +195,13 @@ public class Player : NetworkBehaviour
 
         using (reader)
         {
-            reader.ReadValue(out UInt64 type);
-            reader.ReadValue(out UInt64 tick);
+            reader.ReadValue(out ulong type);
+            reader.ReadValue(out ulong tick);
+            reader.ReadValue(out uint stateIndex);
             switch (type)
             {
-                case (int)WeaponTickDataType.GunPistol:
-                    LatestWeaponTickData = WeaponTickDataGunPistol.NewFromReader(type, tick, reader);
+                case (ulong)WeaponTickDataType.GunPistol:
+                    LatestWeaponTickData = WeaponTickDataGunPistol.NewFromReader(type, tick, stateIndex, reader);
                     break;
             }
         }
