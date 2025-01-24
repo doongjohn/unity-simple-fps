@@ -139,10 +139,9 @@ public class WeaponStateMachine
 
     public virtual void OnUpdate(WeaponInput input, float deltaTime)
     {
-        // FIXME: Start gets run after Update...
         if (CurrentState is null)
         {
-            Debug.Log("CurrentState is null");
+            Debug.LogError("CurrentState is null");
             return;
         }
 
