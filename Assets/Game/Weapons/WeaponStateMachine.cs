@@ -54,7 +54,7 @@ public class WeaponTickData
         if (other == null)
             return false;
 
-        return Type == other.Tick && Tick == other.Tick;
+        return Type == other.Type && Tick == other.Tick;
     }
 }
 
