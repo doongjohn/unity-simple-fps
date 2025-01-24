@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5178203849546021816}
   - component: {fileID: 720618226974214250}
-  - component: {fileID: 4567199943260837257}
   m_Layer: 0
   m_Name: WeaponGunPistol
   m_TagString: Untagged
@@ -45,16 +44,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82f206c0b03fe00438d1df33ef4ad704, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &4567199943260837257
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5647756962845784287}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c73a61d446a814f4680128b3cb972789, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Player: {fileID: 0}

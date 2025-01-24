@@ -13,7 +13,7 @@ public class GameTimer
 {
     public float Duration;
     public float Time;
-    public bool IsEnded;
+    public bool IsEnded => Time >= Duration;
     public List<GameTimerCallback> Callbacks = new();
 
     public GameTimer(float duration)
@@ -30,7 +30,6 @@ public class GameTimer
             if (Time >= Duration)
             {
                 Time = Duration;
-                IsEnded = true;
             }
 
             foreach (var callback in Callbacks)
@@ -50,7 +49,6 @@ public class GameTimer
     public void Reset()
     {
         Time = 0;
-        IsEnded = false;
 
         foreach (var callback in Callbacks)
         {
