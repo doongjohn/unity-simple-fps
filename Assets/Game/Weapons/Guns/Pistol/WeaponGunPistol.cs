@@ -127,11 +127,11 @@ public class WeaponTickDataGunPistol : WeaponTickData
         return result;
     }
 
-    public override bool Compare(WeaponTickData other)
+    public override bool IsEqual(WeaponTickData other)
     {
         if (other is WeaponTickDataGunPistol otherGunPistol)
         {
-            var result = base.Compare(other);
+            var result = base.IsEqual(other);
             if (!result) return false;
             result = result && StateIndex == otherGunPistol.StateIndex;
             result = result && MagazineSize == otherGunPistol.MagazineSize;
@@ -330,7 +330,7 @@ public class WeaponGunPistol : Weapon
             _stateMachine.TickBuffer.RemoveRange(0, i + 1);
 
             // Check prediction.
-            if (serverTickData.Compare(predictedTickData))
+            if (serverTickData.IsEqual(predictedTickData))
             {
                 // Prediction success.
                 Debug.Log("Prediction success");

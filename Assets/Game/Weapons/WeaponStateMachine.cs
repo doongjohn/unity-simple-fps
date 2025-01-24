@@ -49,8 +49,11 @@ public class WeaponTickData
         return null;
     }
 
-    public virtual bool Compare(WeaponTickData other)
+    public virtual bool IsEqual(WeaponTickData other)
     {
+        if (other == null)
+            return false;
+
         return Type == other.Tick && Tick == other.Tick;
     }
 }
