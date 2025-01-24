@@ -19,6 +19,7 @@ public class Player : NetworkBehaviour
 
     private PlayerCameraTarget _cameraTarget;
     private CinemachineCamera _cmFirstPersonCamera;
+
     private Weapon _weapon;
     public WeaponTickData LatestWeaponTickData;
     public Queue<WeaponInput> RecivedWeaponInputs = new();
@@ -81,6 +82,11 @@ public class Player : NetworkBehaviour
 
     public override void OnDestroy()
     {
+        if (_weapon != null)
+        {
+            Destroy(_weapon);
+        }
+
         base.OnDestroy();
     }
 
@@ -181,7 +187,6 @@ public class Player : NetworkBehaviour
         RecivedWeaponInputs.Enqueue(input);
     }
 
-    // FIXME: RPC 매개변수로 상속된 클래스 못넘겨줌
     [Rpc(SendTo.Owner)]
     public void SendWeaponStateToOwnerRpc(byte[] weaponTickData)
     {

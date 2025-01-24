@@ -142,6 +142,7 @@ public class WeaponStateMachine
         // FIXME: Start gets run after Update...
         if (CurrentState is null)
         {
+            Debug.Log("CurrentState is null");
             return;
         }
 

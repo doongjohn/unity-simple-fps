@@ -3,9 +3,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using Unity.Netcode;
 
-public class WeaponStateGunPistolIdle : WeaponState
-{
-}
+public class WeaponStateGunPistolIdle : WeaponState { }
 
 public class WeaponStateGunPistolShoot : WeaponState
 {
@@ -75,9 +73,7 @@ public class WeaponStateGunPistolShoot : WeaponState
     }
 }
 
-public class WeaponStateGunPistolReload : WeaponState
-{
-}
+public class WeaponStateGunPistolReload : WeaponState { }
 
 [StructLayout(LayoutKind.Sequential)]
 public class WeaponTickDataGunPistol : WeaponTickData
