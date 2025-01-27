@@ -114,6 +114,14 @@ public class Player : NetworkBehaviour
         }
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Pickup"))
+        {
+            other.GetComponent<Pickup>().OnPickup(this);
+        }
+    }
+
     private void CameraLook()
     {
         var cameraRotation = _cmFirstPersonCamera.transform.eulerAngles;
