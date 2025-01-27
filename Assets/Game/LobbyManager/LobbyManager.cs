@@ -3,11 +3,13 @@ using System.Reflection;
 using Steamworks;
 using UnityEngine;
 using Unity.Netcode;
+using Netcode.Transports;
 
 public class GameUser
 {
-    public ulong NetId;
-    public Player Player;
+    public ulong NetId = 0;
+    public bool IsDead = false;
+    public Player Player = null;
 }
 
 public class LobbyManager : MonoBehaviour
@@ -22,8 +24,7 @@ public class LobbyManager : MonoBehaviour
     // Key: ClientId, Value: TransportId
     public Dictionary<ulong, ulong> UserTransportId = new();
 
-    public Dictionary<ulong, ulong> ClientToTransportId;
-    public Dictionary<ulong, ulong> TransportToClientId;
+    private Dictionary<ulong, ulong> _clientToTransportId;
 
     private CallResult<LobbyEnter_t> _steamOnJoinLobby;
     private Callback<LobbyChatUpdate_t> _steamOnClientLobbyEvent;
@@ -58,10 +59,10 @@ public class LobbyManager : MonoBehaviour
             {
                 if (clientId == NetworkManager.Singleton.LocalClientId)
                 {
-                    ClientToTransportId.Add(clientId, SteamUser.GetSteamID().m_SteamID);
+                    _clientToTransportId.Add(clientId, SteamUser.GetSteamID().m_SteamID);
                 }
 
-                var steamId = ClientToTransportId[clientId];
+                var steamId = _clientToTransportId[clientId];
                 UserTransportId.Add(clientId, steamId);
                 Users.Add(steamId, new GameUser { NetId = clientId });
             }
@@ -111,13 +112,24 @@ public class LobbyManager : MonoBehaviour
 
         var conManType = typeof(NetworkConnectionManager);
 
-        ClientToTransportId = conManType
+        _clientToTransportId = conManType
             .GetField("ClientIdToTransportIdMap", bindingAttr)
             .GetValue(netConnManagerInstance) as Dictionary<ulong, ulong>;
 
-        TransportToClientId = conManType
-            .GetField("TransportIdToClientIdMap", bindingAttr)
-            .GetValue(netConnManagerInstance) as Dictionary<ulong, ulong>;
+        // TransportToClientId = conManType
+        //     .GetField("TransportIdToClientIdMap", bindingAttr)
+        //     .GetValue(netConnManagerInstance) as Dictionary<ulong, ulong>;
+    }
+
+    public GameUser GetUserByClientId(ulong clientId)
+    {
+        var steamId = UserTransportId[clientId];
+        return Users[steamId];
+    }
+
+    public GameUser GetUserBySteamId(ulong steamId)
+    {
+        return Users[steamId];
     }
 
     public void SetJoinedLobbyId(ulong lobbyId)

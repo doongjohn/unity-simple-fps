@@ -22,6 +22,10 @@ public class TestMap : MapBase
     private void SpawnPlayerRpc(RpcParams rpcParams = default)
     {
         var player = Instantiate(PlayerPrefab);
+
+        var user = LobbyManager.Singleton.GetUserByClientId(rpcParams.Receive.SenderClientId);
+        user.Player = player.GetComponent<Player>();
+
         var networkPlayer = player.GetComponent<NetworkObject>();
         networkPlayer.transform.position = new(0, 1.5f, 0);
         networkPlayer.SpawnWithOwnership(rpcParams.Receive.SenderClientId);
