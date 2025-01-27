@@ -116,9 +116,12 @@ public class Player : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Pickup"))
+        if (IsHost)
         {
-            other.GetComponent<Pickup>().OnPickup(this);
+            if (other.CompareTag("Pickup"))
+            {
+                other.GetComponent<Pickup>().OnPickup(this);
+            }
         }
     }
 
