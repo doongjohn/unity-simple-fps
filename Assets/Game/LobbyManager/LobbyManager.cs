@@ -15,7 +15,12 @@ public class LobbyManager : MonoBehaviour
     public static LobbyManager Singleton { get; private set; }
 
     public CSteamID? JoinedLobbyId { get; private set; }
-    public Dictionary<CSteamID, GameUser> Users = new();
+
+    // Key: TransportId
+    public Dictionary<ulong, GameUser> Users = new();
+
+    // Key: ClientId, Value: TransportId
+    public Dictionary<ulong, ulong> UserTransportId = new();
 
     public Dictionary<ulong, ulong> ClientToTransportId;
     public Dictionary<ulong, ulong> TransportToClientId;
@@ -49,10 +54,16 @@ public class LobbyManager : MonoBehaviour
         NetworkManager.Singleton.OnClientConnectedCallback += (ulong clientId) =>
         {
             Debug.Log($"[NetworkManager] client connected: {clientId}");
-            // if (NetworkManager.Singleton.IsHost)
+            if (NetworkManager.Singleton.IsHost)
             {
+                if (clientId == NetworkManager.Singleton.LocalClientId)
+                {
+                    ClientToTransportId.Add(clientId, SteamUser.GetSteamID().m_SteamID);
+                }
+
                 var steamId = ClientToTransportId[clientId];
-                Debug.Log($"[NetworkManager] client steam id: {steamId}");
+                UserTransportId.Add(clientId, steamId);
+                Users.Add(steamId, new GameUser { NetId = clientId });
             }
         };
 
@@ -67,11 +78,17 @@ public class LobbyManager : MonoBehaviour
 
         NetworkManager.Singleton.OnConnectionEvent += (NetworkManager _, ConnectionEventData data) =>
         {
-            switch (data.EventType)
+            if (NetworkManager.Singleton.IsHost)
             {
-                case ConnectionEvent.PeerDisconnected:
-                    Debug.Log($"[NetworkManager] PeerDisconnected: {data.ClientId}");
-                    break;
+                switch (data.EventType)
+                {
+                    case ConnectionEvent.PeerDisconnected:
+                        Debug.Log($"[NetworkManager] PeerDisconnected: {data.ClientId}");
+                        var steamId = UserTransportId[data.ClientId];
+                        UserTransportId.Remove(data.ClientId);
+                        Users.Remove(steamId);
+                        break;
+                }
             }
         };
     }
@@ -173,7 +190,7 @@ public class LobbyManager : MonoBehaviour
     {
         if (NetworkManager.Singleton.IsHost)
         {
-            // Lobby entered.
+            // On entered.
             if ((arg.m_rgfChatMemberStateChange & (uint)EChatMemberStateChange.k_EChatMemberStateChangeEntered) != 0)
             {
                 Debug.Log($"[Steamworks.NET] Client joined: {arg.m_ulSteamIDUserChanged}");
@@ -187,10 +204,10 @@ public class LobbyManager : MonoBehaviour
                 }
             }
 
-            // Lobby left.
+            // On disconnected.
             if ((arg.m_rgfChatMemberStateChange & (uint)EChatMemberStateChange.k_EChatMemberStateChangeDisconnected) != 0)
             {
-                Debug.Log($"[Steamworks.NET] Client left: {arg.m_ulSteamIDUserChanged}");
+                Debug.Log($"[Steamworks.NET] Client disconnected: {arg.m_ulSteamIDUserChanged}");
             }
         }
     }
