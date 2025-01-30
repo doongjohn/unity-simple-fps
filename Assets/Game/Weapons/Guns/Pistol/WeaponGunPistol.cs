@@ -194,7 +194,7 @@ public class WeaponContextGunPistol : WeaponContext<WeaponTickDataGunPistol>
             CurrentStateIndex = tickDataGunPistol.Header.StateIndex;
             MagazineSize = tickDataGunPistol.MagazineSize;
             AmmoCount = tickDataGunPistol.AmmoCount;
-            ShootTimer = tickDataGunPistol.ShootTimer;
+            ShootTimer.CopyExceptCallbacks(tickDataGunPistol.ShootTimer);
         }
         else
         {

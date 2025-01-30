@@ -35,6 +35,13 @@ public struct GameTimer : INetworkSerializable
         serializer.SerializeValue(ref CallbackIndex);
     }
 
+    public void CopyExceptCallbacks(GameTimer other)
+    {
+        Duration = other.Duration;
+        Time = other.Time;
+        CallbackIndex = other.CallbackIndex;
+    }
+
     public void Reset()
     {
         Time = 0;
@@ -43,7 +50,7 @@ public struct GameTimer : INetworkSerializable
 
     public void RollbackTo(float time)
     {
-        for (var i = Callbacks.Count; i >= 0; --i)
+        for (var i = Callbacks.Count - 1; i >= 0; --i)
         {
             var callback = Callbacks[i];
             if (callback.TriggerTime < time)
