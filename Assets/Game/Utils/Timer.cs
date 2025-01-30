@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
+using Unity.Netcode;
 
-public struct GameTimer
+public struct GameTimer : INetworkSerializable
 {
     public class Callback
     {
@@ -26,6 +26,13 @@ public struct GameTimer
         Time = 0;
         CallbackIndex = 0;
         Callbacks = new();
+    }
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref Duration);
+        serializer.SerializeValue(ref Time);
+        serializer.SerializeValue(ref CallbackIndex);
     }
 
     public void Reset()
