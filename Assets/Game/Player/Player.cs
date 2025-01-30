@@ -96,19 +96,12 @@ public class Player : NetworkBehaviour
         if (IsOwner)
         {
             CameraLook();
+            Movement();
         }
 
         if (IsHost)
         {
             CheckDeath();
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (IsOwner)
-        {
-            Movement();
         }
     }
 
@@ -147,19 +140,15 @@ public class Player : NetworkBehaviour
         var forwardSpeed = Vector3.Dot(transform.forward, velocity);
         var rightSpeed = Vector3.Dot(transform.right, velocity);
 
-        // TODO: Check for _rb.GetAccumulatedForce()
+        Vector3 acceleration = Vector3.zero;
 
         if (Mathf.Abs(targetForwardSpeed) > Mathf.Abs(forwardSpeed))
-        {
-            var addSpeed = (targetForwardSpeed - forwardSpeed) / Time.fixedDeltaTime;
-            _rb.AddForce(transform.forward * addSpeed, ForceMode.Acceleration);
-        }
+            acceleration += transform.forward * (targetForwardSpeed - forwardSpeed);
 
         if (Mathf.Abs(targetRightSpeed) > Mathf.Abs(rightSpeed))
-        {
-            var addSpeed = (targetRightSpeed - rightSpeed) / Time.fixedDeltaTime;
-            _rb.AddForce(transform.right * addSpeed, ForceMode.Acceleration);
-        }
+            acceleration += transform.right * (targetRightSpeed - rightSpeed);
+
+        _rb.AddForce(acceleration, ForceMode.VelocityChange);
     }
 
     public void SetPlayerActive(bool value)
