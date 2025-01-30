@@ -9,13 +9,12 @@ using Unity.Netcode;
 public class Player : NetworkBehaviour
 {
     [SerializeField] private float WalkSpeed = 4.0f;
-
     [SerializeField] private CinemachineCamera PrefabCmFirstPersonCamera;
     [SerializeField] private Weapon PrefabWeaponPistol;
 
     private GameUser _user;
 
-    private MeshRenderer _meshRenderer;
+    private GameObject _visual;
     private Collider _collider;
     private Rigidbody _rb;
 
@@ -47,7 +46,7 @@ public class Player : NetworkBehaviour
 
     private void Awake()
     {
-        _meshRenderer = GetComponent<MeshRenderer>();
+        _visual = transform.GetChild(0).gameObject;
         _collider = GetComponent<Collider>();
         _rb = GetComponent<Rigidbody>();
 
@@ -165,7 +164,7 @@ public class Player : NetworkBehaviour
 
     public void SetPlayerActive(bool value)
     {
-        _meshRenderer.enabled = value;
+        _visual.SetActive(value);
         _collider.enabled = value;
         _rb.detectCollisions = value;
         _rb.useGravity = value;
