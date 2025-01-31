@@ -15,17 +15,17 @@ public class InGameHud : MonoBehaviour
         _healthBar = _root.Q("HealthBar") as ProgressBar;
     }
 
-    public void InitPlayer(Player player)
+    public void SetTargetPlayer(Player player)
     {
         _healthBar.highValue = player.HealthMax;
         _healthBar.value = player.Health;
 
+        _healthBar.ClearBindings();
         _healthBar.SetBinding("highValue", new DataBinding
         {
             dataSource = player,
             dataSourcePath = new(nameof(Player.HealthMax)),
         });
-
         _healthBar.SetBinding("value", new DataBinding
         {
             dataSource = player,
