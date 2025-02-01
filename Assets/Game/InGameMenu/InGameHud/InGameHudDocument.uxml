@@ -2,5 +2,6 @@
     <Style src="project://database/Assets/Game/InGameMenu/InGameHud/InGameHud.uss?fileID=7433441132597879392&amp;guid=03299494b3938c743bc40111ef487603&amp;type=3#InGameHud" />
     <engine:VisualElement style="flex-grow: 1;">
         <engine:ProgressBar name="HealthBar" value="20" class="healthBar" style="bottom: 0; position: absolute; left: 0; width: 400px; margin-top: 20px; margin-right: 20px; margin-bottom: 20px; margin-left: 20px;" />
+        <engine:RadioButton toggle-on-label-click="false" focusable="false" enabled="false" value="true" picking-mode="Ignore" style="position: absolute; align-self: center; align-items: center; top: 0; bottom: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; scale: 0.5 0.5;" />
     </engine:VisualElement>
 </engine:UXML>
