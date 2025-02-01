@@ -9,11 +9,13 @@ using Unity.Netcode;
 public struct PlayerInput : INetworkSerializable
 {
     public ulong Tick;
+    public float InputRotaionY;
     public Vector2 InputWalkDir;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref Tick);
+        serializer.SerializeValue(ref InputRotaionY);
         serializer.SerializeValue(ref InputWalkDir);
     }
 }
@@ -134,9 +136,11 @@ public class Player : NetworkBehaviour
 
             CameraLook();
 
+            // Get input.
             var playerInput = new PlayerInput
             {
                 Tick = _tick,
+                InputRotaionY = _cmFirstPersonCamera.transform.eulerAngles.y,
                 InputWalkDir = _inputMove.ReadValue<Vector2>(),
             };
 
@@ -170,8 +174,11 @@ public class Player : NetworkBehaviour
             ulong lastProcessedTick = 0;
             while (RecivedPlayerInputs.Count > 0)
             {
-                LastPlayerInput = RecivedPlayerInputs.Dequeue();
-                lastProcessedTick = LastPlayerInput.Tick;
+                var input = RecivedPlayerInputs.Dequeue();
+                OnInput(input);
+
+                LastPlayerInput = input;
+                lastProcessedTick = input.Tick;
             }
 
             OnUpdate(LastPlayerInput, Time.fixedDeltaTime);
@@ -243,8 +250,6 @@ public class Player : NetworkBehaviour
         var rotation = transform.eulerAngles;
         rotation.y = cameraRotation.y;
         transform.eulerAngles = rotation;
-
-        SendPlayerRotationRpc(cameraRotation.y);
     }
 
     private void Movement(Vector2 inputWalkDir, float deltaTime)
@@ -260,6 +265,13 @@ public class Player : NetworkBehaviour
             (transform.forward * forwardSpeed) +
             (transform.right * rightSpeed) +
             (transform.up * gravity));
+    }
+
+    private void OnInput(PlayerInput input)
+    {
+        var rotation = transform.eulerAngles;
+        rotation.y = input.InputRotaionY;
+        transform.eulerAngles = rotation;
     }
 
     private void OnUpdate(PlayerInput input, float deltaTime)
@@ -291,6 +303,7 @@ public class Player : NetworkBehaviour
                 for (var j = 0; j < InputBuffer.Count; ++j)
                 {
                     var input = InputBuffer[j];
+                    OnInput(input);
                     OnUpdate(input, Time.fixedDeltaTime);
                     TickBuffer[j] = GetTickData(input.Tick);
                 }
@@ -339,14 +352,6 @@ public class Player : NetworkBehaviour
         {
             _weapon.ResetWeapon();
         }
-    }
-
-    [Rpc(SendTo.NotOwner)]
-    private void SendPlayerRotationRpc(float rotationY)
-    {
-        var rotation = transform.eulerAngles;
-        rotation.y = rotationY;
-        transform.eulerAngles = rotation;
     }
 
     [Rpc(SendTo.Owner)]
