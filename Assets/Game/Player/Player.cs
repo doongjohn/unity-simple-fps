@@ -5,7 +5,6 @@ using UnityEngine.InputSystem;
 using Unity.Properties;
 using Unity.Cinemachine;
 using Unity.Netcode;
-using Unity.Netcode.Components;
 
 public struct PlayerInput : INetworkSerializable
 {
@@ -43,7 +42,6 @@ public class Player : NetworkBehaviour
 
     private GameObject _visual;
     private Collider _collider;
-    private AnticipatedNetworkTransform _netTransform;
     private CharacterController _characterController;
 
     private InputAction _inputMove;
@@ -82,8 +80,6 @@ public class Player : NetworkBehaviour
     {
         _visual = transform.GetChild(0).gameObject;
         _collider = GetComponent<Collider>();
-        _netTransform = GetComponent<AnticipatedNetworkTransform>();
-        _netTransform.Interpolate = true;
         _characterController = GetComponent<CharacterController>();
 
         _inputMove = InputSystem.actions.FindAction("Player/Move");
@@ -169,6 +165,22 @@ public class Player : NetworkBehaviour
         if (IsHost)
         {
             CheckDeath();
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (IsHost && !IsOwner)
+        {
+            ulong lastProcessedTick = 0;
+            while (RecivedPlayerInputs.Count > 0)
+            {
+                var input = RecivedPlayerInputs.Dequeue();
+                OnUpdate(input, input.DeltaTime);
+                lastProcessedTick = input.Tick;
+            }
+
+            SendPlayerTickDataToOwnerRpc(GetTickData(lastProcessedTick));
         }
     }
 
@@ -334,6 +346,12 @@ public class Player : NetworkBehaviour
         var rotation = transform.eulerAngles;
         rotation.y = rotationY;
         transform.eulerAngles = rotation;
+    }
+
+    [Rpc(SendTo.Owner)]
+    private void SendPlayerTickDataToOwnerRpc(PlayerTickData tickData)
+    {
+        LatestTickData = tickData;
     }
 
     [Rpc(SendTo.Server)]
