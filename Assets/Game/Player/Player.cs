@@ -167,12 +167,11 @@ public class Player : NetworkBehaviour
 
         if (IsHost && !IsOwner)
         {
-            PlayerInput input = new PlayerInput();
             ulong lastProcessedTick = 0;
             if (RecivedPlayerInputs.Count > 0)
             {
                 LastPlayerInput = RecivedPlayerInputs.Dequeue();
-                lastProcessedTick = input.Tick;
+                lastProcessedTick = LastPlayerInput.Tick;
             }
 
             OnUpdate(LastPlayerInput, Time.fixedDeltaTime);
