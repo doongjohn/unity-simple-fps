@@ -168,14 +168,18 @@ public class Player : NetworkBehaviour
         if (IsHost && !IsOwner)
         {
             ulong lastProcessedTick = 0;
-            if (RecivedPlayerInputs.Count > 0)
+            while (RecivedPlayerInputs.Count > 0)
             {
                 LastPlayerInput = RecivedPlayerInputs.Dequeue();
                 lastProcessedTick = LastPlayerInput.Tick;
             }
 
             OnUpdate(LastPlayerInput, Time.fixedDeltaTime);
-            SendPlayerTickDataToOwnerRpc(GetTickData(lastProcessedTick));
+
+            if (lastProcessedTick != 0)
+            {
+                SendPlayerTickDataToOwnerRpc(GetTickData(lastProcessedTick));
+            }
         }
     }
 
