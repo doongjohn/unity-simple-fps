@@ -32,6 +32,18 @@ public struct PlayerTickData : INetworkSerializable
     }
 }
 
+public struct OtherPlayerTickData : INetworkSerializable
+{
+    public float RotaionY;
+    public Vector3 Position;
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref RotaionY);
+        serializer.SerializeValue(ref Position);
+    }
+}
+
 public class Player : NetworkBehaviour
 {
     [SerializeField] private float WalkSpeed = 4.0f;
@@ -116,6 +128,11 @@ public class Player : NetworkBehaviour
             inGameHud.SetTargetPlayer(this);
         }
 
+        if (!IsHost && !IsOwner)
+        {
+            _characterController.enabled = false;
+        }
+
         base.OnNetworkSpawn();
     }
 
@@ -187,6 +204,15 @@ public class Player : NetworkBehaviour
             {
                 SendPlayerTickDataToOwnerRpc(GetTickData(lastProcessedTick));
             }
+        }
+
+        if (IsHost)
+        {
+            SendOtherPlayerTickDataRpc(new OtherPlayerTickData
+            {
+                RotaionY = transform.eulerAngles.y,
+                Position = transform.position,
+            });
         }
     }
 
@@ -358,6 +384,19 @@ public class Player : NetworkBehaviour
     private void SendPlayerTickDataToOwnerRpc(PlayerTickData tickData)
     {
         LatestTickData = tickData;
+    }
+
+    [Rpc(SendTo.NotServer)]
+    private void SendOtherPlayerTickDataRpc(OtherPlayerTickData tickData)
+    {
+        if (IsOwner)
+            return;
+
+        var rotation = transform.eulerAngles;
+        rotation.y = tickData.RotaionY;
+        transform.eulerAngles = rotation;
+
+        transform.position = tickData.Position;
     }
 
     [Rpc(SendTo.Server)]
