@@ -166,10 +166,7 @@ public class Player : NetworkBehaviour
         {
             CheckDeath();
         }
-    }
 
-    private void FixedUpdate()
-    {
         if (IsHost && !IsOwner)
         {
             ulong lastProcessedTick = 0;
@@ -216,7 +213,9 @@ public class Player : NetworkBehaviour
 
     public void ApplyTickData(PlayerTickData tickData)
     {
+        _characterController.enabled = false;
         transform.position = tickData.Position;
+        _characterController.enabled = true;
     }
 
     public void PushTickData(PlayerInput input, PlayerTickData tickData)
@@ -283,8 +282,12 @@ public class Player : NetworkBehaviour
             TickBuffer.RemoveRange(0, i + 1);
 
             // Check prediction.
-            if (!serverTickData.Equals(predictedTickData))
+            Debug.Log($"server pos: {serverTickData.Position}, client pos: {predictedTickData.Position}");
+            // Debug.Log($"server pos: {serverTickData.Tick}, client pos: {predictedTickData.Tick}");
+            if (serverTickData.Position != predictedTickData.Position)
             {
+                Debug.Log("prediction failed");
+
                 // Resimulate.
                 ApplyTickData(serverTickData);
                 for (var j = 0; j < InputBuffer.Count; ++j)
