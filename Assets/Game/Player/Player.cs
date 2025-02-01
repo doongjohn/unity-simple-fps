@@ -9,13 +9,11 @@ using Unity.Netcode;
 public struct PlayerInput : INetworkSerializable
 {
     public ulong Tick;
-    public float DeltaTime;
     public Vector2 InputWalkDir;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref Tick);
-        serializer.SerializeValue(ref DeltaTime);
         serializer.SerializeValue(ref InputWalkDir);
     }
 }
@@ -74,6 +72,7 @@ public class Player : NetworkBehaviour
     public List<PlayerInput> InputBuffer = new();
     public List<PlayerTickData> TickBuffer = new();
     public PlayerTickData? LatestTickData = null;
+    public PlayerInput LastPlayerInput = new();
     public Queue<PlayerInput> RecivedPlayerInputs = new();
 
     private void Awake()
@@ -127,7 +126,7 @@ public class Player : NetworkBehaviour
         base.OnDestroy();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (IsOwner)
         {
@@ -138,13 +137,12 @@ public class Player : NetworkBehaviour
             var playerInput = new PlayerInput
             {
                 Tick = _tick,
-                DeltaTime = Time.deltaTime,
                 InputWalkDir = _inputMove.ReadValue<Vector2>(),
             };
 
             if (IsHost)
             {
-                OnUpdate(playerInput, Time.deltaTime);
+                OnUpdate(playerInput, Time.fixedDeltaTime);
             }
             else
             {
@@ -152,7 +150,7 @@ public class Player : NetworkBehaviour
                 SendPlayerInputToServerRpc(playerInput);
 
                 // Client-side prediction.
-                OnUpdate(playerInput, Time.deltaTime);
+                OnUpdate(playerInput, Time.fixedDeltaTime);
 
                 // Store tick data.
                 PushTickData(playerInput, GetTickData(_tick));
@@ -169,14 +167,15 @@ public class Player : NetworkBehaviour
 
         if (IsHost && !IsOwner)
         {
+            PlayerInput input = new PlayerInput();
             ulong lastProcessedTick = 0;
-            while (RecivedPlayerInputs.Count > 0)
+            if (RecivedPlayerInputs.Count > 0)
             {
-                var input = RecivedPlayerInputs.Dequeue();
-                OnUpdate(input, input.DeltaTime);
+                LastPlayerInput = RecivedPlayerInputs.Dequeue();
                 lastProcessedTick = input.Tick;
             }
 
+            OnUpdate(LastPlayerInput, Time.fixedDeltaTime);
             SendPlayerTickDataToOwnerRpc(GetTickData(lastProcessedTick));
         }
     }
@@ -282,18 +281,14 @@ public class Player : NetworkBehaviour
             TickBuffer.RemoveRange(0, i + 1);
 
             // Check prediction.
-            Debug.Log($"server pos: {serverTickData.Position}, client pos: {predictedTickData.Position}");
-            // Debug.Log($"server pos: {serverTickData.Tick}, client pos: {predictedTickData.Tick}");
             if (serverTickData.Position != predictedTickData.Position)
             {
-                Debug.Log("prediction failed");
-
                 // Resimulate.
                 ApplyTickData(serverTickData);
                 for (var j = 0; j < InputBuffer.Count; ++j)
                 {
                     var input = InputBuffer[j];
-                    OnUpdate(input, input.DeltaTime);
+                    OnUpdate(input, Time.fixedDeltaTime);
                     TickBuffer[j] = GetTickData(input.Tick);
                 }
             }
