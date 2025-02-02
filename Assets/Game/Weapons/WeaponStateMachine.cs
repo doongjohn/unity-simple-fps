@@ -4,14 +4,22 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public struct WeaponInput : INetworkSerializeByMemcpy
+public struct WeaponInput : INetworkSerializable
 {
     public ulong Tick;
-    public float DeltaTime;
     public Vector3 InputCameraDir;
     public bool InputWeaponShoot;
     public bool InputWeaponAim;
     public bool InputWeaponReload;
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref Tick);
+        serializer.SerializeValue(ref InputCameraDir);
+        serializer.SerializeValue(ref InputWeaponShoot);
+        serializer.SerializeValue(ref InputWeaponAim);
+        serializer.SerializeValue(ref InputWeaponReload);
+    }
 }
 
 public enum WeaponTickDataType : ulong

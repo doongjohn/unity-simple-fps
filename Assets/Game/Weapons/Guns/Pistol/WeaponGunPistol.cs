@@ -310,64 +310,57 @@ public class WeaponGunPistol : Weapon
         }
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (!_player.IsSpawned)
             return;
 
-        if (_player.IsDead)
-            return;
-
         if (_player.IsOwner)
         {
-            _tick += 1;
-
-            // Get user input.
-            var input = new WeaponInput
+            if (!_player.IsDead)
             {
-                Tick = _tick,
-                DeltaTime = Time.deltaTime,
-                InputCameraDir = _player.GetCameraDir(),
-                InputWeaponShoot = _context.InputWeaponShoot.IsPressed(),
-                InputWeaponAim = _context.InputWeaponAim.IsPressed(),
-                InputWeaponReload = _context.InputWeaponReload.IsPressed()
-            };
+                _tick += 1;
 
-            if (_stateMachine.Player.IsHost)
-            {
-                // Run state machine.
-                _stateMachine.OnUpdate(input, Time.deltaTime);
-            }
-            else
-            {
-                // Send user input.
-                _player.SendWeaponInputToServerRpc(input);
+                // Get user input.
+                var input = new WeaponInput
+                {
+                    Tick = _tick,
+                    InputCameraDir = _player.GetCameraDir(),
+                    InputWeaponShoot = _context.InputWeaponShoot.WasPressedThisFrame(),
+                    InputWeaponAim = _context.InputWeaponAim.IsPressed(),
+                    InputWeaponReload = _context.InputWeaponReload.IsPressed()
+                };
 
-                // Run state machine. (client-side prediction)
-                _stateMachine.OnUpdate(input, Time.deltaTime);
+                if (_stateMachine.Player.IsHost)
+                {
+                    // Run state machine.
+                    _stateMachine.OnUpdate(input, Time.deltaTime);
+                }
+                else
+                {
+                    // Send user input.
+                    _player.SendWeaponInputToServerRpc(input);
 
-                // Store tick data.
-                _stateMachine.PushTickData(input, _stateMachine.Context.GetTickData(_tick));
+                    // Run state machine. (client-side prediction)
+                    _stateMachine.OnUpdate(input, Time.fixedDeltaTime);
 
-                // Reconcile.
-                Reconcile();
+                    // Store tick data.
+                    _stateMachine.PushTickData(input, _stateMachine.Context.GetTickData(_tick));
+
+                    // Reconcile.
+                    Reconcile();
+                }
             }
         }
-    }
 
-    private void FixedUpdate()
-    {
         if (_player.IsHost)
         {
-            if (_player.IsDead)
-                return;
-
             // Process input.
             ulong lastProcessedTick = 0;
             while (_player.RecivedWeaponInputs.Count > 0)
             {
                 var input = _player.RecivedWeaponInputs.Dequeue();
-                _stateMachine.OnUpdate(input, input.DeltaTime);
+                _stateMachine.OnUpdate(input, Time.fixedDeltaTime);
 
                 lastProcessedTick = input.Tick;
             }
@@ -410,7 +403,7 @@ public class WeaponGunPistol : Weapon
                 for (var j = 0; j < _stateMachine.InputBuffer.Count; ++j)
                 {
                     var input = _stateMachine.InputBuffer[j];
-                    _stateMachine.OnUpdate(input, input.DeltaTime);
+                    _stateMachine.OnUpdate(input, Time.fixedDeltaTime);
                     _stateMachine.TickBuffer[j] = _stateMachine.Context.GetTickData(input.Tick);
                 }
             }
