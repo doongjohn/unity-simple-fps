@@ -147,6 +147,9 @@ public class Player : NetworkBehaviour
 
     private void FixedUpdate()
     {
+        if (!IsSpawned)
+            return;
+
         if (IsOwner)
         {
             _tick += 1;

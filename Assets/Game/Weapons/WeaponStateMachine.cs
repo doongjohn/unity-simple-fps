@@ -8,17 +8,23 @@ public struct WeaponInput : INetworkSerializable
 {
     public ulong Tick;
     public Vector3 InputCameraDir;
-    public bool InputWeaponShoot;
-    public bool InputWeaponAim;
-    public bool InputWeaponReload;
+    public bool InputDownWeaponShoot;
+    public bool InputHoldWeaponAim;
+    public bool InputDownWeaponReload;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref Tick);
         serializer.SerializeValue(ref InputCameraDir);
-        serializer.SerializeValue(ref InputWeaponShoot);
-        serializer.SerializeValue(ref InputWeaponAim);
-        serializer.SerializeValue(ref InputWeaponReload);
+        serializer.SerializeValue(ref InputDownWeaponShoot);
+        serializer.SerializeValue(ref InputHoldWeaponAim);
+        serializer.SerializeValue(ref InputDownWeaponReload);
+    }
+
+    public void ResetInputDown()
+    {
+        InputDownWeaponShoot = false;
+        InputDownWeaponReload = false;
     }
 }
 
@@ -132,7 +138,7 @@ public class WeaponStateMachine<TickData> where TickData : struct, IWeaponTickDa
         return TickBuffer.FindIndex(item => item.GetHeader().Tick == tick);
     }
 
-    public virtual void OnUpdate(WeaponInput input, float deltaTime)
+    public void DoTransition(WeaponInput input)
     {
         if (CurrentState is null)
         {
@@ -157,6 +163,16 @@ public class WeaponStateMachine<TickData> where TickData : struct, IWeaponTickDa
                 SetCurrentState(nextState);
                 CurrentState.OnStateEnter();
             }
+        }
+
+    }
+
+    public virtual void OnUpdate(WeaponInput input, float deltaTime)
+    {
+        if (CurrentState is null)
+        {
+            Debug.LogError("CurrentState is null");
+            return;
         }
 
         CurrentState.OnStateUpdate(input, deltaTime);

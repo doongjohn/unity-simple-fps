@@ -126,12 +126,12 @@ public class WeaponContextGunPistol : WeaponContext<WeaponTickDataGunPistol>
         switch (ctx.CurrentStateIndex)
         {
             case (uint)StateIndex.Idle:
-                if (ctx.AmmoCount > 0 && input.InputWeaponShoot)
+                if (ctx.AmmoCount > 0 && input.InputDownWeaponShoot)
                 {
                     return (uint)StateIndex.Shoot;
                 }
 
-                if (ctx.AmmoCount < ctx.MagazineSize && input.InputWeaponReload)
+                if (ctx.AmmoCount < ctx.MagazineSize && input.InputDownWeaponReload)
                 {
                     return (uint)StateIndex.Reload;
                 }
@@ -276,6 +276,7 @@ public class WeaponGunPistol : Weapon
 {
     private readonly WeaponContextGunPistol _context = new();
     private readonly WeaponStateMachine<WeaponTickDataGunPistol> _stateMachine = new();
+    private WeaponInput LastWeaponInput = new();
 
     public override void Init(Player player)
     {
@@ -326,14 +327,15 @@ public class WeaponGunPistol : Weapon
                 {
                     Tick = _tick,
                     InputCameraDir = _player.GetCameraDir(),
-                    InputWeaponShoot = _context.InputWeaponShoot.WasPressedThisFrame(),
-                    InputWeaponAim = _context.InputWeaponAim.IsPressed(),
-                    InputWeaponReload = _context.InputWeaponReload.IsPressed()
+                    InputDownWeaponShoot = _context.InputWeaponShoot.WasPressedThisFrame(),
+                    InputHoldWeaponAim = _context.InputWeaponAim.IsPressed(),
+                    InputDownWeaponReload = _context.InputWeaponReload.WasPressedThisFrame(),
                 };
 
                 if (_stateMachine.Player.IsHost)
                 {
                     // Run state machine.
+                    _stateMachine.DoTransition(input);
                     _stateMachine.OnUpdate(input, Time.deltaTime);
                 }
                 else
@@ -342,6 +344,7 @@ public class WeaponGunPistol : Weapon
                     _player.SendWeaponInputToServerRpc(input);
 
                     // Run state machine. (client-side prediction)
+                    _stateMachine.DoTransition(input);
                     _stateMachine.OnUpdate(input, Time.fixedDeltaTime);
 
                     // Store tick data.
@@ -359,15 +362,24 @@ public class WeaponGunPistol : Weapon
             ulong lastProcessedTick = 0;
             while (_player.RecivedWeaponInputs.Count > 0)
             {
-                var input = _player.RecivedWeaponInputs.Dequeue();
-                _stateMachine.OnUpdate(input, Time.fixedDeltaTime);
+                // TODO: 인풋이 뭉쳐서 오는 경우에 대해서 고민해보기.
 
+                var input = _player.RecivedWeaponInputs.Dequeue();
+                _stateMachine.DoTransition(input);
+
+                LastWeaponInput = input;
                 lastProcessedTick = input.Tick;
             }
 
+            _stateMachine.OnUpdate(LastWeaponInput, Time.fixedDeltaTime);
+            LastWeaponInput.ResetInputDown();
+
             // Send state to client.
-            var tickData = _stateMachine.Context.GetTickData(lastProcessedTick);
-            _player.SendWeaponStateToOwnerRpc(tickData.Serialize());
+            if (lastProcessedTick != 0)
+            {
+                var tickData = _stateMachine.Context.GetTickData(lastProcessedTick);
+                _player.SendWeaponStateToOwnerRpc(tickData.Serialize());
+            }
 
             // TODO: 다른 캐릭터의 데이터도 동기화 (이펙트랑 애니만??)
         }
