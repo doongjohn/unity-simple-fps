@@ -218,6 +218,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e285baf58f94de40b32ac0d362faa6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UseLocal: 0
 --- !u!1 &5360041139346326840
 GameObject:
   m_ObjectHideFlags: 0
@@ -358,3 +359,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Target: {fileID: 0}
   Offset: {x: 0, y: 0, z: 0}
+  Interpolator: {fileID: 0}

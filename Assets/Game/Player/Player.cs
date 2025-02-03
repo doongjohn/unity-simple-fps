@@ -194,12 +194,23 @@ public class Player : NetworkBehaviour
         if (IsHost && !IsOwner)
         {
             ulong lastProcessedTick = 0;
+            Vector2 accumulatedWalkDir = Vector2.zero;
             while (RecivedPlayerInputs.Count > 0)
             {
                 var input = RecivedPlayerInputs.Dequeue();
                 OnInput(input);
 
+                if (RecivedPlayerInputs.Count == 1)
+                {
+                    accumulatedWalkDir += input.InputWalkDir;
+                }
+                else
+                {
+                    accumulatedWalkDir += input.InputWalkDir.Rotate(input.InputRotaionY * Mathf.Deg2Rad);
+                }
+
                 LastPlayerInput = input;
+                LastPlayerInput.InputWalkDir = accumulatedWalkDir.normalized;
                 lastProcessedTick = input.Tick;
             }
 
