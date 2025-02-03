@@ -23,11 +23,13 @@ public struct PlayerInput : INetworkSerializable
 public struct PlayerTickData : INetworkSerializable
 {
     public ulong Tick;
+    public float VelocityY;
     public Vector3 Position;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref Tick);
+        serializer.SerializeValue(ref VelocityY);
         serializer.SerializeValue(ref Position);
     }
 }
@@ -66,6 +68,7 @@ public class Player : NetworkBehaviour
     public Queue<WeaponInput> RecivedWeaponInputs = new();
 
     public bool IsDead { get; private set; } = false;
+    private float _velocityY = 0;
 
     private NetworkVariable<int> _healthMax = new(100);
     [CreateProperty]
@@ -204,6 +207,7 @@ public class Player : NetworkBehaviour
             ulong lastProcessedTick = 0;
             if (_startTick)
             {
+                Debug.Log(RecivedPlayerInputs.Count);
                 if (RecivedPlayerInputs.Count > 0)
                 {
                     if (RecivedPlayerInputs.Count <= 5) _startSpeedUp = false;
@@ -286,12 +290,15 @@ public class Player : NetworkBehaviour
         return new PlayerTickData
         {
             Tick = tick,
+            VelocityY = _velocityY,
             Position = transform.position,
         };
     }
 
     public void ApplyTickData(PlayerTickData tickData)
     {
+        _velocityY = tickData.VelocityY;
+
         _characterController.enabled = false;
         transform.position = tickData.Position;
         _characterController.enabled = true;
@@ -322,12 +329,12 @@ public class Player : NetworkBehaviour
 
         var forwardSpeed = inputWalkDir.y * WalkSpeed * deltaTime;
         var rightSpeed = inputWalkDir.x * WalkSpeed * deltaTime;
-        var gravity = _characterController.isGrounded ? 0 : ((_characterController.velocity.y + -10f * deltaTime) * deltaTime);
+        _velocityY = _characterController.isGrounded ? 0 : (_velocityY + -10f * deltaTime);
 
         _characterController.Move(
             (transform.forward * forwardSpeed) +
             (transform.right * rightSpeed) +
-            (transform.up * gravity));
+            (transform.up * _velocityY * deltaTime));
     }
 
     private void OnInput(PlayerInput input)
