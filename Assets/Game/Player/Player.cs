@@ -86,6 +86,8 @@ public class Player : NetworkBehaviour
     private ulong _tick = 0;
     private ulong _serverTick = 0;
     private bool _startTick = false;
+    private bool _startSpeedUp = false;
+    private bool _startSlowDown = false;
     public List<PlayerInput> InputBuffer = new();
     public List<PlayerTickData> TickBuffer = new();
     public PlayerTickData? LatestTickData = null;
@@ -204,12 +206,41 @@ public class Player : NetworkBehaviour
             {
                 if (RecivedPlayerInputs.Count > 0)
                 {
-                    var input = RecivedPlayerInputs.Dequeue();
-                    OnInput(input);
-                    OnUpdate(input, Time.fixedDeltaTime);
+                    if (RecivedPlayerInputs.Count == 5)
+                    {
+                        _startSpeedUp = false;
+                        _startSlowDown = false;
+                    }
 
-                    LastPlayerInput = input;
-                    lastProcessedTick = input.Tick;
+                    if (RecivedPlayerInputs.Count >= 10)
+                    {
+                        _startSpeedUp = true;
+                    }
+
+                    if (RecivedPlayerInputs.Count <= 3)
+                    {
+                        _startSlowDown = true;
+                    }
+
+                    if (!_startSlowDown || RecivedPlayerInputs.Count % 2 == 0)
+                    {
+                        var input = RecivedPlayerInputs.Dequeue();
+                        OnInput(input);
+                        OnUpdate(input, Time.fixedDeltaTime);
+
+                        LastPlayerInput = input;
+                        lastProcessedTick = input.Tick;
+                    }
+
+                    if (_startSpeedUp && RecivedPlayerInputs.Count % 2 == 0)
+                    {
+                        var input = RecivedPlayerInputs.Dequeue();
+                        OnInput(input);
+                        OnUpdate(input, Time.fixedDeltaTime);
+
+                        LastPlayerInput = input;
+                        lastProcessedTick = input.Tick;
+                    }
                 }
                 else
                 {
