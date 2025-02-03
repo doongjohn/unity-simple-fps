@@ -48,6 +48,7 @@ public class Player : NetworkBehaviour
 {
     [SerializeField] private float WalkSpeed = 4.0f;
     [SerializeField] private CinemachineCamera PrefabCmFirstPersonCamera;
+    [SerializeField] private PlayerCameraTarget PrefabPlayerCameraTarget;
     [SerializeField] private Weapon PrefabWeaponPistol;
 
     private GameUser _user;
@@ -108,8 +109,7 @@ public class Player : NetworkBehaviour
         }
 
         // Setup camera target.
-        _cameraTarget = new GameObject().AddComponent<PlayerCameraTarget>();
-        _cameraTarget.gameObject.AddComponent<TransformInterpolator>();
+        _cameraTarget = Instantiate(PrefabPlayerCameraTarget);
         _cameraTarget.Target = transform;
         _cameraTarget.Offset = Vector3.up * 0.5f;
         _cameraTarget.TeleportToTarget();
