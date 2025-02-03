@@ -404,6 +404,7 @@ public class Player : NetworkBehaviour
         transform.eulerAngles = rotation;
 
         transform.position = tickData.Position;
+        _visual.transform.Teleport(Vector3.zero, Quaternion.identity);
     }
 
     [Rpc(SendTo.Server)]
