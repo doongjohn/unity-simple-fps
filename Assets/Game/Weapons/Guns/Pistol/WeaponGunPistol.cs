@@ -362,8 +362,6 @@ public class WeaponGunPistol : Weapon
             ulong lastProcessedTick = 0;
             while (_player.RecivedWeaponInputs.Count > 0)
             {
-                // TODO: 인풋이 뭉쳐서 오는 경우에 대해서 고민해보기.
-
                 var input = _player.RecivedWeaponInputs.Dequeue();
                 _stateMachine.DoTransition(input);
 

@@ -172,7 +172,6 @@ public class Player : NetworkBehaviour
 
             if (IsHost)
             {
-                OnInput(input);
                 OnUpdate(input, Time.fixedDeltaTime);
             }
             else
@@ -181,7 +180,6 @@ public class Player : NetworkBehaviour
                 SendPlayerInputToServerRpc(input);
 
                 // Client-side prediction.
-                OnInput(input);
                 OnUpdate(input, Time.fixedDeltaTime);
 
                 // Store tick data.
@@ -219,7 +217,6 @@ public class Player : NetworkBehaviour
                     if (!_startSlowDown || RecivedPlayerInputs.Count % 2 == 0)
                     {
                         var input = RecivedPlayerInputs.Dequeue();
-                        OnInput(input);
                         OnUpdate(input, Time.fixedDeltaTime);
 
                         LastPlayerInput = input;
@@ -229,7 +226,6 @@ public class Player : NetworkBehaviour
                     if (_startSpeedUp && RecivedPlayerInputs.Count % 2 == 0)
                     {
                         var input = RecivedPlayerInputs.Dequeue();
-                        OnInput(input);
                         OnUpdate(input, Time.fixedDeltaTime);
 
                         LastPlayerInput = input;
@@ -337,15 +333,12 @@ public class Player : NetworkBehaviour
             (transform.up * _velocityY * deltaTime));
     }
 
-    private void OnInput(PlayerInput input)
+    private void OnUpdate(PlayerInput input, float deltaTime)
     {
         var rotation = transform.eulerAngles;
         rotation.y = input.InputRotaionY;
         transform.eulerAngles = rotation;
-    }
 
-    private void OnUpdate(PlayerInput input, float deltaTime)
-    {
         Movement(input.InputWalkDir, deltaTime);
     }
 
@@ -375,7 +368,6 @@ public class Player : NetworkBehaviour
                 for (var j = 0; j < InputBuffer.Count; ++j)
                 {
                     var input = InputBuffer[j];
-                    OnInput(input);
                     OnUpdate(input, Time.fixedDeltaTime);
                     TickBuffer[j] = GetTickData(input.Tick);
                 }
