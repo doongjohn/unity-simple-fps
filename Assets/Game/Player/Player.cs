@@ -176,6 +176,9 @@ public class Player : NetworkBehaviour
             }
             else
             {
+                var netTransport = NetworkManager.Singleton.NetworkConfig.NetworkTransport;
+                Debug.Log($"ping: {netTransport.GetCurrentRtt(netTransport.ServerClientId)}");
+
                 // Send input.
                 SendPlayerInputToServerRpc(input);
 
