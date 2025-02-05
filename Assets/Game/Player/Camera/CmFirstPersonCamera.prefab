@@ -150,7 +150,7 @@ MonoBehaviour:
         Gain: 0
         LegacyInput: Mouse X
         LegacyGain: 3
-        CancelDeltaTime: 0
+        CancelDeltaTime: 1
       InputValue: 0
       Driver:
         AccelTime: 0
@@ -163,7 +163,7 @@ MonoBehaviour:
         Gain: 0
         LegacyInput: Mouse Y
         LegacyGain: -3
-        CancelDeltaTime: 0
+        CancelDeltaTime: 1
       InputValue: -0
       Driver:
         AccelTime: 0
