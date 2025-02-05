@@ -3,7 +3,7 @@
 - Unity version: 6
 - Unity Netcode for GameObjects
     - Transport: SteamNetworkingSockets
-      - Steamworks.NET
+        - Steamworks.NET
 
 ## Features
 
