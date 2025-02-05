@@ -1330,7 +1330,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   PrefabInGameEscapeMenu: {fileID: 61761606419647581, guid: 56ef8517bd4e49545b11bf47ae36d7f5, type: 3}
   PrefabInGameHud: {fileID: 4667531814189093366, guid: 6de18ab28bf2d194d8b820dc8299caa4, type: 3}
-  PlayerPrefab: {fileID: 5360041139346326840, guid: dcefdb42a1c54f64f9a0165ff875e6f0, type: 3}
+  PlayerPrefab: {fileID: 3866063172556934154, guid: dcefdb42a1c54f64f9a0165ff875e6f0, type: 3}
 --- !u!1001 &5448856261348953857
 PrefabInstance:
   m_ObjectHideFlags: 0

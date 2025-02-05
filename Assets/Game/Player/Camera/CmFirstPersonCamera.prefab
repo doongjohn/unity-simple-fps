@@ -139,17 +139,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ScanRecursively: 1
   SuppressInputWhileBlending: 1
-  IgnoreTimeScale: 0
+  IgnoreTimeScale: 1
   m_ControllerManager:
     Controllers:
     - Name: Look X (Pan)
       Owner: {fileID: 3792408160248783950}
       Enabled: 1
       Input:
-        InputAction: {fileID: 2228394223737527710, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-        Gain: 0.1
+        InputAction: {fileID: 0}
+        Gain: 0
         LegacyInput: Mouse X
-        LegacyGain: 200
+        LegacyGain: 3
         CancelDeltaTime: 0
       InputValue: 0
       Driver:
@@ -159,14 +159,14 @@ MonoBehaviour:
       Owner: {fileID: 3792408160248783950}
       Enabled: 1
       Input:
-        InputAction: {fileID: 2228394223737527710, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-        Gain: -0.1
+        InputAction: {fileID: 0}
+        Gain: 0
         LegacyInput: Mouse Y
-        LegacyGain: -200
+        LegacyGain: -3
         CancelDeltaTime: 0
       InputValue: -0
       Driver:
         AccelTime: 0
         DecelTime: 0
   PlayerIndex: -1
-  AutoEnableInputs: 1
+  AutoEnableInputs: 0

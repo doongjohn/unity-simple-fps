@@ -344,4 +344,4 @@ MonoBehaviour:
   WalkSpeed: 4
   PrefabCmFirstPersonCamera: {fileID: 8907721915714607548, guid: 4d7089de1f25c6a448dcc9a172a8c811, type: 3}
   PrefabPlayerCameraTarget: {fileID: 240644381404792601, guid: 15541baddda80f24b93ccb835b69b77a, type: 3}
-  PrefabWeaponPistol: {fileID: 720618226974214250, guid: 8cc5fa64d68a8fb4880cc921e7877fd7, type: 3}
+  PrefabWeaponGunPistol: {fileID: 720618226974214250, guid: 8cc5fa64d68a8fb4880cc921e7877fd7, type: 3}
