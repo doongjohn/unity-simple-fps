@@ -25,6 +25,7 @@ public struct PlayerInput : INetworkSerializable
         serializer.SerializeValue(ref InputRotaionY);
         serializer.SerializeValue(ref InputCameraDir);
         serializer.SerializeValue(ref InputWalkDir);
+        serializer.SerializeValue(ref InputDownWeaponSwap);
         serializer.SerializeValue(ref InputDownWeaponShoot);
         serializer.SerializeValue(ref InputHoldWeaponShoot);
         serializer.SerializeValue(ref InputHoldWeaponAim);
@@ -33,6 +34,7 @@ public struct PlayerInput : INetworkSerializable
 
     public void ResetInputDown()
     {
+        InputDownWeaponSwap = false;
         InputDownWeaponShoot = false;
         InputDownWeaponReload = false;
     }
