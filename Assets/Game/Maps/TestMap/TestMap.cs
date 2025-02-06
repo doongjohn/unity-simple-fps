@@ -12,27 +12,25 @@ public class TestMap : MapBase
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
-        if (IsHost)
-        {
-            foreach (var user in LobbyManager.Singleton.Users.Values)
-            {
-                SpawnPlayer(user.ClientId);
-            }
-        }
-    }
-
-    protected override void OnClientConnected(ulong clientId)
-    {
-        if (IsHost)
-        {
-            SpawnPlayer(clientId);
-        }
     }
 
     protected override void OnClientStopped(bool isHost)
     {
         SceneManager.LoadScene(Scenes.LobbyListMenu);
+    }
+
+    protected override void OnSceneEvent(SceneEvent sceneEvent)
+    {
+        if (IsHost)
+        {
+            switch (sceneEvent.SceneEventType)
+            {
+                // Client scene loaded.
+                case SceneEventType.LoadComplete:
+                    SpawnPlayer(sceneEvent.ClientId);
+                    break;
+            }
+        }
     }
 
     private void SpawnPlayer(ulong clientId)
