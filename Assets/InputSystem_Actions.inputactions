@@ -540,6 +540,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "WeaponSwap",
+                    "type": "Button",
+                    "id": "19a68a0b-d197-4129-b5e0-997f02e2f723",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "WeaponShoot",
                     "type": "Button",
                     "id": "fdb1aaf1-8670-401a-95e2-68a7324d4523",
@@ -675,6 +684,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "WeaponAim",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5286c271-0d11-4b61-b685-86401e1e4a6a",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "WeaponSwap",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
