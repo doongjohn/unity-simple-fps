@@ -29,23 +29,16 @@ public struct WeaponTickDataGunAssaultRifle : IWeaponTickData
     public byte[] Serialize()
     {
         var size = Marshal.SizeOf(typeof(WeaponTickDataGunAssaultRifle));
-        var writer = new FastBufferWriter(size, Unity.Collections.Allocator.Temp);
+        using var writer = new FastBufferWriter(size, Unity.Collections.Allocator.Temp);
         if (!writer.TryBeginWrite(size))
-        {
             throw new OverflowException("Not enough space in the buffer");
-        }
 
-        byte[] result;
-        using (writer)
-        {
-            writer.WriteValue(Header);
-            writer.WriteValue(MagazineSize);
-            writer.WriteValue(AmmoCount);
-            writer.WriteValue(ShootTimer);
-            writer.WriteValue(ReloadTimer);
-            result = writer.ToArray();
-        }
-        return result;
+        writer.WriteValue(Header);
+        writer.WriteValue(MagazineSize);
+        writer.WriteValue(AmmoCount);
+        writer.WriteValue(ShootTimer);
+        writer.WriteValue(ReloadTimer);
+        return writer.ToArray();
     }
 }
 

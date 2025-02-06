@@ -641,13 +641,19 @@ public class Player : NetworkBehaviour
         // Set player latest tick data.
         LatestTickData = tickData;
 
-        var reader = new FastBufferReader(weaponTickData, Unity.Collections.Allocator.Temp);
-        if (!reader.TryBeginRead(weaponTickData.Length)) throw new OverflowException("Not enough space in the buffer");
-        using (reader)
+        unsafe
         {
             // Set weapon latest tick data.
-            reader.ReadValue(out WeaponTickDataHeader header);
-            _weapons[(WeaponType)header.Type].SetLatestTickData(header, reader);
+            fixed (byte* bytePtr = weaponTickData)
+            {
+                var size = weaponTickData.Length;
+                using var reader = new FastBufferReader(bytePtr, Unity.Collections.Allocator.None, size);
+                if (!reader.TryBeginRead(size))
+                    throw new OverflowException("Not enough space in the buffer");
+
+                reader.ReadValue(out WeaponTickDataHeader header);
+                _weapons[(WeaponType)header.Type].SetLatestTickData(header, reader);
+            }
         }
     }
 
