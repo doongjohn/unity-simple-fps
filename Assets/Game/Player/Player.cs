@@ -584,10 +584,8 @@ public class Player : NetworkBehaviour
         IsDead = true;
         SetPlayerActive(false);
 
-        if (_weapon)
-        {
-            _weapon.ResetWeapon();
-        }
+        foreach (var weapon in _weapons.Values)
+            weapon.ResetWeapon();
     }
 
     public void CheckDeath()
@@ -599,7 +597,6 @@ public class Player : NetworkBehaviour
         {
             OnDeath();
             PlayerOnDeathRpc();
-
             Invoke(nameof(Respawn), 3.0f);
         }
     }
@@ -651,8 +648,18 @@ public class Player : NetworkBehaviour
                 if (!reader.TryBeginRead(size))
                     throw new OverflowException("Not enough space in the buffer");
 
+                // Read header.
                 reader.ReadValue(out WeaponTickDataHeader header);
-                _weapons[(WeaponType)header.Type].SetLatestTickData(header, reader);
+
+                var weapon = _weapons[header.Type];
+                if (header.Type == weapon.WeaponType)
+                {
+                    weapon.SetLatestTickData(header, reader);
+                }
+                else
+                {
+                    Debug.LogError($"SetLatestTickData: WeaponType mismatch {header.Type} != {weapon.WeaponType}");
+                }
             }
         }
     }
