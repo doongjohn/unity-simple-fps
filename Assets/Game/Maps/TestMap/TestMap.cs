@@ -12,6 +12,12 @@ public class TestMap : MapBase
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        if (IsHost)
+        {
+            // Spawn host player.
+            SpawnPlayer(NetworkManager.Singleton.LocalClientId);
+        }
     }
 
     protected override void OnClientStopped(bool isHost)
@@ -27,6 +33,7 @@ public class TestMap : MapBase
             {
                 // Client scene loaded.
                 case SceneEventType.LoadComplete:
+                    // Spawn client player.
                     SpawnPlayer(sceneEvent.ClientId);
                     break;
             }
