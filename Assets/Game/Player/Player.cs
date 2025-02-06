@@ -183,7 +183,7 @@ public class Player : NetworkBehaviour
             _characterController.enabled = false;
         }
 
-        base.OnNetworkPostSpawn();
+        base.OnNetworkSpawn();
     }
 
     public override void OnDestroy()
