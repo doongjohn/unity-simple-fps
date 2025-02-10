@@ -37,7 +37,7 @@ public class SteamManager : MonoBehaviour
         }
     }
 
-    async Task RunCallbacks()
+    private async Task RunCallbacks()
     {
         while (!destroyCancellationToken.IsCancellationRequested)
         {
