@@ -35,7 +35,7 @@
                         </engine:VisualElement>
                         <engine:VisualElement style="height: 400px; flex-direction: row;">
                             <engine:VisualElement style="height: 400px; flex-grow: 1; flex-shrink: 1;">
-                                <engine:ListView name="LobbyChatHistoryListView" virtualization-method="DynamicHeight" selection-type="None" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
+                                <engine:ListView name="LobbyChatHistoryListView" virtualization-method="DynamicHeight" selection-type="None" class="chatHistoryContainer" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
                                 <engine:TextField placeholder-text="Chat message..." name="LobbyChatTextField" is-delayed="true" style="margin-top: 2px; margin-right: 2px; margin-bottom: 4px; margin-left: 2px; font-size: 16px;" />
                             </engine:VisualElement>
                             <engine:VisualElement style="justify-content: flex-end; flex-shrink: 0;">
