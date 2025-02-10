@@ -222,7 +222,8 @@ public class LobbyDashboardMenu : MonoBehaviour
         };
         _lobbyMemberListView.bindItem = (item, index) =>
         {
-            (item.userData as LobbyMemberListEntryController)?.UpdateElements(_lobbyMemberListEntries[index]);
+            if (item.userData is LobbyMemberListEntryController controller)
+                controller.UpdateElements(_lobbyMemberListEntries[index]);
         };
 
         // Setup LobbyChatHistortListView.
@@ -235,7 +236,8 @@ public class LobbyDashboardMenu : MonoBehaviour
         };
         _lobbyChatHistoryListView.bindItem = (item, index) =>
         {
-            (item.userData as LobbyChatHistoryListEntryController)?.UpdateElements(_lobbyChatHistoryListEntries[index]);
+            if (item.userData is LobbyChatHistoryListEntryController controller)
+                controller.UpdateElements(_lobbyChatHistoryListEntries[index]);
         };
 
         // Setup LobbyChatTextField.
