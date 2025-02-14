@@ -50,3 +50,11 @@ MonoBehaviour:
     BulletTrailPrefab: {fileID: -895379496315333627, guid: 0eec7a75f24fa8a4492e1b01d37b6fbf, type: 3}
     MagazineSize: 20
     AmmoCount: 0
+    ShootTimer:
+      Duration: 0.05
+      Time: 0
+      CallbackIndex: 0
+    ReloadTimer:
+      Duration: 1
+      Time: 0
+      CallbackIndex: 0
