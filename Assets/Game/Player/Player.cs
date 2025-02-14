@@ -130,6 +130,7 @@ public class Player : NetworkBehaviour
     public PlayerInput LastPlayerInput = new();
     public Queue<PlayerInput> RecivedPlayerInputs = new();
 
+    // Interpolation
     private Vector3 _startPos;
     private Vector3 _nextPos;
     private float _interpolateTime;
@@ -697,9 +698,7 @@ public class Player : NetworkBehaviour
 
         _lastServerTick = tickData.Tick;
 
-        var rotation = transform.eulerAngles;
-        rotation.y = tickData.RotaionY;
-        transform.eulerAngles = rotation;
+        CharacterRotate(tickData.RotaionY);
 
         _startPos = transform.position;
         _nextPos = tickData.Position;
