@@ -205,6 +205,9 @@ public class Player : NetworkBehaviour
 
     private void Update()
     {
+        if (!IsSpawned)
+            return;
+
         if (!IsHost && !IsOwner)
         {
             // Interpolation
