@@ -574,6 +574,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "GrenadeThrow",
+                    "type": "Button",
+                    "id": "68516347-9969-47e6-a9ca-1c4c9097a18d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -695,6 +704,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "WeaponSwap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "491fca2b-a3a9-4f1a-b466-e7b74d837db2",
+                    "path": "<Keyboard>/g",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "GrenadeThrow",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

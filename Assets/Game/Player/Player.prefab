@@ -346,3 +346,5 @@ MonoBehaviour:
   PrefabPlayerCameraTarget: {fileID: 240644381404792601, guid: 15541baddda80f24b93ccb835b69b77a, type: 3}
   PrefabWeaponGunPistol: {fileID: 720618226974214250, guid: 8cc5fa64d68a8fb4880cc921e7877fd7, type: 3}
   PrefabWeaponGunAssaultRifle: {fileID: 7887261274912363783, guid: 64981619044c8fd488137575ad36c0a7, type: 3}
+  PrefabGrenade: {fileID: 176510384161867189, guid: 7450d2c8e386291499c761443828936e, type: 3}
+  IsThrowingGrenade: 0
