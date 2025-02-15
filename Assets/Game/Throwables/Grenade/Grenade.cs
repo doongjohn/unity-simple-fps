@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using UnityEditor.Timeline.Actions;
 
 public class Grenade : NetworkBehaviour
 {
@@ -12,6 +13,18 @@ public class Grenade : NetworkBehaviour
         _networkObject = GetComponent<NetworkObject>();
         _rigidbody = GetComponent<Rigidbody>();
         _rigidbody.isKinematic = true;
+        _rigidbody.interpolation = RigidbodyInterpolation.None;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsHost)
+        {
+            _rigidbody.isKinematic = false;
+            _rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+            _rigidbody.linearVelocity = transform.forward * 10f;
+        }
+        base.OnNetworkSpawn();
     }
 
     private void Update()
