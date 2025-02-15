@@ -531,6 +531,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Jump",
+                    "type": "Button",
+                    "id": "c3afe111-a2d6-474a-bb27-c2bebe309b75",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Look",
                     "type": "Value",
                     "id": "97f6f2ea-8921-4834-b0f9-c84d22120262",
@@ -715,6 +724,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "GrenadeThrow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "db2e8cdf-734d-43d1-a610-c6489640857b",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Jump",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
