@@ -522,7 +522,7 @@ public class Player : NetworkBehaviour
                 {
                     var grenade = Instantiate(PrefabGrenade);
                     var networkGrenade = grenade.GetComponent<NetworkObject>();
-                    var dir = Quaternion.AngleAxis(-10f, transform.right) * _cmFirstPersonCamera.transform.forward;
+                    var dir = Quaternion.AngleAxis(-10f, transform.right) * input.InputCameraDir;
                     networkGrenade.transform.position = GetHeadPos() + transform.forward;
                     networkGrenade.transform.forward = dir;
                     networkGrenade.Spawn();
