@@ -14,16 +14,6 @@ public class Grenade : NetworkBehaviour
         _rigidbody.isKinematic = true;
     }
 
-    public override void OnNetworkSpawn()
-    {
-        if (IsHost)
-        {
-            _rigidbody.isKinematic = false;
-            _rigidbody.linearVelocity = transform.forward * 10f;
-        }
-        base.OnNetworkSpawn();
-    }
-
     private void Update()
     {
         if (!IsSpawned)
