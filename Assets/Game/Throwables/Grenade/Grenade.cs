@@ -1,12 +1,13 @@
 using UnityEngine;
 using Unity.Netcode;
-using UnityEditor.Timeline.Actions;
 
 public class Grenade : NetworkBehaviour
 {
     private NetworkObject _networkObject;
     private GameTimer _despawnTimer = new(3.0f);
     private Rigidbody _rigidbody;
+    private GameObject _visual;
+    private Vector3 _startPos;
 
     private void Awake()
     {
@@ -14,6 +15,8 @@ public class Grenade : NetworkBehaviour
         _rigidbody = GetComponent<Rigidbody>();
         _rigidbody.isKinematic = true;
         _rigidbody.interpolation = RigidbodyInterpolation.None;
+        _visual = transform.GetChild(0).gameObject;
+        _visual.SetActive(false);
     }
 
     public override void OnNetworkSpawn()
@@ -23,7 +26,11 @@ public class Grenade : NetworkBehaviour
             _rigidbody.isKinematic = false;
             _rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
             _rigidbody.linearVelocity = transform.forward * 10f;
+            _visual.SetActive(true);
         }
+
+        _startPos = transform.position;
+
         base.OnNetworkSpawn();
     }
 
@@ -32,11 +39,20 @@ public class Grenade : NetworkBehaviour
         if (!IsSpawned)
             return;
 
-        _despawnTimer.Tick(Time.deltaTime);
-        if (_despawnTimer.IsEnded)
+        if (!IsHost)
         {
-            // TODO: damage player in area
-            _networkObject.Despawn();
+            if (!_visual.activeSelf && _startPos != transform.position)
+                _visual.SetActive(true);
+        }
+
+        if (IsHost)
+        {
+            _despawnTimer.Tick(Time.deltaTime);
+            if (_despawnTimer.IsEnded)
+            {
+                // TODO: damage player in area
+                _networkObject.Despawn();
+            }
         }
     }
 }
