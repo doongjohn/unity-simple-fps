@@ -515,17 +515,17 @@ public class Player : NetworkBehaviour
             _grenadeThrowTimer.Tick(deltaTime);
             if (_grenadeThrowTimer.IsEnded)
             {
+                _grenadeThrowTimer.Reset();
                 IsThrowingGrenade = false;
 
                 if (IsHost)
                 {
                     var grenade = Instantiate(PrefabGrenade);
                     var networkGrenade = grenade.GetComponent<NetworkObject>();
-                    var forward = Quaternion.AngleAxis(-50f, transform.right) * transform.forward;
+                    var dir = Quaternion.AngleAxis(-10f, transform.right) * _cmFirstPersonCamera.transform.forward;
                     networkGrenade.transform.position = GetHeadPos() + transform.forward;
-                    networkGrenade.transform.forward = forward;
+                    networkGrenade.transform.forward = dir;
                     networkGrenade.Spawn();
-                    grenade.GetComponent<Rigidbody>().AddForce(forward * 500f);
                 }
             }
         }

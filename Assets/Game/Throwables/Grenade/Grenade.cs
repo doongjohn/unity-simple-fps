@@ -5,10 +5,23 @@ public class Grenade : NetworkBehaviour
 {
     private NetworkObject _networkObject;
     private GameTimer _despawnTimer = new(3.0f);
+    private Rigidbody _rigidbody;
 
     private void Awake()
     {
         _networkObject = GetComponent<NetworkObject>();
+        _rigidbody = GetComponent<Rigidbody>();
+        _rigidbody.isKinematic = true;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsHost)
+        {
+            _rigidbody.isKinematic = false;
+            _rigidbody.linearVelocity = transform.forward * 10f;
+        }
+        base.OnNetworkSpawn();
     }
 
     private void Update()
