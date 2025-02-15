@@ -6,7 +6,6 @@ using UnityEngine.InputSystem;
 using Unity.Properties;
 using Unity.Cinemachine;
 using Unity.Netcode;
-using Unity.Netcode.Components;
 
 public struct PlayerInput : INetworkSerializable
 {
