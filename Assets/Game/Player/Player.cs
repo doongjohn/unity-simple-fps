@@ -520,12 +520,10 @@ public class Player : NetworkBehaviour
 
                 if (IsHost)
                 {
-                    var dir = Quaternion.AngleAxis(-10f, transform.right) * input.InputCameraDir;
                     var grenade = Instantiate(PrefabGrenade);
-                    var networkGrenade = grenade.GetComponent<NetworkObject>();
-                    networkGrenade.transform.position = GetHeadPos() + transform.forward;
-                    networkGrenade.transform.forward = dir;
-                    networkGrenade.Spawn();
+                    grenade.transform.position = GetHeadPos() + transform.forward;
+                    grenade.transform.forward = Quaternion.AngleAxis(-10f, transform.right) * input.InputCameraDir;
+                    grenade.GetComponent<NetworkObject>().Spawn();
                 }
             }
         }
