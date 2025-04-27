@@ -1,6 +1,6 @@
 # Unity Simple FPS
 
-- Unity version: 6
+- Unity version: 6.1
 - Unity Netcode for GameObjects
     - Transport: SteamNetworkingSockets
         - Steamworks.NET
