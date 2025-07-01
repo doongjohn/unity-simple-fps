@@ -246,6 +246,7 @@ public class LobbyDashboardMenu : MonoBehaviour
         // Setup LobbyChatTextField.
         // https://discussions.unity.com/t/how-do-you-give-keyboard-focus-to-a-textfield-focus-has-no-effect/815310/7
         // https://discussions.unity.com/t/important-message-related-to-the-textfield-refactor-for-2022-1/862700
+        // https://discussions.unity.com/t/ui-toolkit-textfield-value-is-not-set-when-submitting-with-mobile-touch-keyboard-while-isdelayed-is-true/1512283
         _lobbyChatTextField.SetEnabled(false);
         _lobbyChatTextField.RegisterCallback<KeyDownEvent>(evt =>
         {
