@@ -244,20 +244,29 @@ public class LobbyDashboardMenu : MonoBehaviour
         };
 
         // Setup LobbyChatTextField.
+        // https://discussions.unity.com/t/how-do-you-give-keyboard-focus-to-a-textfield-focus-has-no-effect/815310/7
+        // https://discussions.unity.com/t/important-message-related-to-the-textfield-refactor-for-2022-1/862700
         _lobbyChatTextField.SetEnabled(false);
+        _lobbyChatTextField.RegisterCallback<KeyDownEvent>(evt =>
+        {
+            if (evt.keyCode == KeyCode.Return)
+            {
+                _root.schedule.Execute(() => _lobbyChatTextField?.Focus());
+            }
+        }, TrickleDown.TrickleDown);
         _lobbyChatTextField.RegisterCallback<NavigationSubmitEvent>(evt =>
         {
-            var text = _lobbyChatTextField.value;
-            if (string.IsNullOrEmpty(text))
+            _lobbyChatTextField.value = _lobbyChatTextField.value.Trim();
+            if (string.IsNullOrEmpty(_lobbyChatTextField.value))
                 return;
 
             if (LobbyChatManager != null)
             {
                 var name = LobbyManager.Singleton.GetLocalUser().Name;
-                LobbyChatManager.BroadcastMessageRpc(name, text);
+                LobbyChatManager.BroadcastMessageRpc(name, _lobbyChatTextField.value);
                 _lobbyChatTextField.value = "";
             }
-        });
+        }, TrickleDown.TrickleDown);
 
         // Request lobby list.
         RefreshLobbyList();
@@ -282,13 +291,15 @@ public class LobbyDashboardMenu : MonoBehaviour
 
     public void AddChatMessage(string Name, string Message)
     {
+        // https://discussions.unity.com/t/layout-update-is-struggling-to-process-current-layout/880564
         _lobbyChatHistoryListEntries.Add(new LobbyChatHistroyListEntryData
         {
             Name = Name,
             Message = Message,
         });
         _lobbyChatHistoryListView.RefreshItems();
-        _lobbyChatHistoryListView.ScrollToItem(_lobbyChatHistoryListEntries.Count - 1);
+        _lobbyChatHistoryListView.ScrollToItem(0);
+        _lobbyChatHistoryListView.ScrollToItem(-1);
     }
 
     private void OnClientStarted()
@@ -313,13 +324,13 @@ public class LobbyDashboardMenu : MonoBehaviour
         _lobbyChatHistoryListEntries.Clear();
         _lobbyChatHistoryListView.RefreshItems();
 
-        _createLobbyButton.visible = true;
-        _deleteLobbyButton.visible = true;
-
+        _startMatchButton.visible = false;
+        _startMatchButton.SetEnabled(false);
         _startMatchButton.UnregisterCallback<ClickEvent>(OnClickStartMatchButton);
         _startMatchButton.UnregisterCallback<ClickEvent>(OnClickLeaveLobbyButton);
-        _startMatchButton.text = "Start match";
-        _startMatchButton.RegisterCallback<ClickEvent>(OnClickStartMatchButton);
+
+        _createLobbyButton.visible = true;
+        _deleteLobbyButton.visible = true;
     }
 
     private void SteamOnRequestLobbyList(LobbyMatchList_t arg, bool bIOFailure)
@@ -398,24 +409,28 @@ public class LobbyDashboardMenu : MonoBehaviour
 
     private void UpdateLobbyElements()
     {
-        if (!NetworkManager.Singleton.IsClient)
-            return;
-
         _lobbyNameTextField.SetEnabled(false);
         _maxPlayersIntField.SetEnabled(false);
         _friendsOnlyToggle.SetEnabled(false);
 
-        // Reset callbacks.
+        _startMatchButton.visible = false;
+        _startMatchButton.SetEnabled(false);
         _startMatchButton.UnregisterCallback<ClickEvent>(OnClickStartMatchButton);
         _startMatchButton.UnregisterCallback<ClickEvent>(OnClickLeaveLobbyButton);
 
+        // Check connected.
+        if (!NetworkManager.Singleton.IsClient)
+            return;
+
         if (NetworkManager.Singleton.IsHost)
         {
+            _startMatchButton.visible = true;
+            _startMatchButton.text = "Start match";
+            _startMatchButton.SetEnabled(true);
+            _startMatchButton.RegisterCallback<ClickEvent>(OnClickStartMatchButton);
+
             _createLobbyButton.visible = true;
             _deleteLobbyButton.visible = true;
-
-            _startMatchButton.text = "Start match";
-            _startMatchButton.RegisterCallback<ClickEvent>(OnClickStartMatchButton);
         }
         else
         {
@@ -426,11 +441,13 @@ public class LobbyDashboardMenu : MonoBehaviour
                 _maxPlayersIntField.value = SteamMatchmaking.GetLobbyMemberLimit(lobbyId);
             }
 
+            _startMatchButton.visible = true;
+            _startMatchButton.text = "Leave lobby";
+            _startMatchButton.SetEnabled(true);
+            _startMatchButton.RegisterCallback<ClickEvent>(OnClickLeaveLobbyButton);
+
             _createLobbyButton.visible = false;
             _deleteLobbyButton.visible = false;
-
-            _startMatchButton.text = "Leave lobby";
-            _startMatchButton.RegisterCallback<ClickEvent>(OnClickLeaveLobbyButton);
         }
 
         RefreshLobbyList();
